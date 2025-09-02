@@ -1,0 +1,22 @@
+// Estilos customizados para a listagem de alunos
+// A maioria dos estilos está sendo feita com Tailwind CSS
+
+.table-row:hover {
+  background-color: #f9fafb;
+}
+
+.search-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.filter-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.action-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.action-button:hover {
+  transform: translateY(-1px);
+}

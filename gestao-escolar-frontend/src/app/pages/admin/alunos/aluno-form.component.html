@@ -1,0 +1,144 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <div class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">
+            {{ isEditMode ? 'Editar Aluno' : 'Novo Aluno' }}
+          </h1>
+          <p class="text-sm text-gray-500">
+            {{ isEditMode ? 'Atualize os dados do aluno' : 'Cadastre um novo aluno no sistema' }}
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <button 
+            (click)="cancel()"
+            class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="max-w-3xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Form Card -->
+    <div class="bg-white shadow rounded-lg">
+      <div class="px-4 py-5 sm:p-6">
+        <form (ngSubmit)="onSubmit()" class="space-y-6">
+          <!-- Error Message -->
+          <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+            {{ error }}
+          </div>
+
+          <!-- Nome -->
+          <div>
+            <label for="nome" class="block text-sm font-medium text-gray-700">
+              Nome Completo *
+            </label>
+            <input
+              type="text"
+              id="nome"
+              name="nome"
+              [(ngModel)]="aluno.nome"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 form-input"
+              placeholder="Digite o nome completo"
+            />
+          </div>
+
+          <!-- Matrícula -->
+          <div>
+            <label for="matricula" class="block text-sm font-medium text-gray-700">
+              Matrícula *
+            </label>
+            <input
+              type="text"
+              id="matricula"
+              name="matricula"
+              [(ngModel)]="aluno.matricula"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 form-input"
+              placeholder="Digite a matrícula"
+            />
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">
+              Email *
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              [(ngModel)]="aluno.email"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 form-input"
+              placeholder="Digite o email"
+            />
+          </div>
+
+          <!-- Data de Nascimento -->
+          <div>
+            <label for="dataNascimento" class="block text-sm font-medium text-gray-700">
+              Data de Nascimento *
+            </label>
+            <input
+              type="date"
+              id="dataNascimento"
+              name="dataNascimento"
+              [(ngModel)]="aluno.dataNascimento"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 form-input"
+            />
+          </div>
+
+          <!-- Turma -->
+          <div>
+            <label for="turma" class="block text-sm font-medium text-gray-700">
+              Turma *
+            </label>
+            <select
+              id="turma"
+              name="turma"
+              [(ngModel)]="aluno.turmaId"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 form-select"
+            >
+              <option value="">Selecione uma turma</option>
+              <option *ngFor="let turma of turmas" [value]="turma.id">
+                {{ turma.nome }} - {{ turma.serie }} ({{ turma.anoLetivo }})
+              </option>
+            </select>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <button
+              type="button"
+              (click)="cancel()"
+              class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 transition-colors cancel-button"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              [disabled]="loading"
+              class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center submit-button"
+            >
+              <svg *ngIf="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              {{ loading ? (isEditMode ? 'Salvando...' : 'Criando...') : (isEditMode ? 'Salvar Alterações' : 'Criar Aluno') }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>

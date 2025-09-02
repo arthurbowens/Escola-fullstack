@@ -1,0 +1,26 @@
+// Estilos customizados para o formulário de alunos
+// A maioria dos estilos está sendo feita com Tailwind CSS
+
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-select:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.submit-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.cancel-button {
+  transition: all 0.2s ease-in-out;
+}
+
+.cancel-button:hover {
+  transform: translateY(-1px);
+}
