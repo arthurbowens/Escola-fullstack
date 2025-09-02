@@ -1,0 +1,47 @@
+// Estilos específicos para a lista de disciplinas
+.disciplina-card {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.search-input {
+  transition: all 0.2s ease-in-out;
+  
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+  }
+}
+
+.action-button {
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+}
+
+// Animação para cards
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.disciplina-card {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .disciplina-card {
+    margin-bottom: 1rem;
+  }
+}

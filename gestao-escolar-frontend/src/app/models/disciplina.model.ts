@@ -1,4 +1,10 @@
-import { Disciplina } from './disciplina.model';
+export interface Disciplina {
+  id?: string;
+  nome: string;
+  cargaHoraria: number;
+  professor?: Professor;
+  professorId?: string;
+}
 
 export interface Professor {
   id?: string;
@@ -12,12 +18,8 @@ export interface Professor {
   disciplinas?: Disciplina[];
 }
 
-export interface ProfessorDTO {
+export interface DisciplinaDTO {
   nome: string;
-  cpf: string;
-  email: string;
-  senha: string;
-  dataNascimento: string;
-  formacaoAcademica?: string;
-  telefone?: string;
+  cargaHoraria: number;
+  professorId?: string;
 }

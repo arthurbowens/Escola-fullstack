@@ -1,4 +1,4 @@
-import { Disciplina } from './professor.model';
+import { Disciplina } from './disciplina.model';
 
 export interface Aluno {
   id?: string;

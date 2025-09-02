@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Disciplina } from '../models/professor.model';
+import { Disciplina, DisciplinaDTO } from '../models/disciplina.model';
 import { AuthService } from './auth.service';
 
 @Injectable({
@@ -38,11 +38,11 @@ export class DisciplinaService {
     return this.http.get<Disciplina[]>(`${this.API_URL}/turma/${turmaId}`, { headers: this.getHeaders() });
   }
 
-  createDisciplina(disciplina: Disciplina): Observable<Disciplina> {
+  createDisciplina(disciplina: DisciplinaDTO): Observable<Disciplina> {
     return this.http.post<Disciplina>(this.API_URL, disciplina, { headers: this.getHeaders() });
   }
 
-  updateDisciplina(id: string, disciplina: Disciplina): Observable<Disciplina> {
+  updateDisciplina(id: string, disciplina: DisciplinaDTO): Observable<Disciplina> {
     return this.http.put<Disciplina>(`${this.API_URL}/${id}`, disciplina, { headers: this.getHeaders() });
   }
 

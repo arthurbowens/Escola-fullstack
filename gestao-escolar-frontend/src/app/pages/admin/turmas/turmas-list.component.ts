@@ -7,7 +7,7 @@ import { AlunoService } from '../../../services/aluno.service';
 import { DisciplinaService } from '../../../services/disciplina.service';
 import { AlertService } from '../../../services/alert.service';
 import { Turma, Aluno } from '../../../models/aluno.model';
-import { Disciplina } from '../../../models/professor.model';
+import { Disciplina } from '../../../models/disciplina.model';
 
 @Component({
   selector: 'app-turmas-list',
