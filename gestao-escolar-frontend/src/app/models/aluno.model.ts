@@ -9,6 +9,42 @@ export interface Aluno {
   senha: string;
   turma?: Turma;
   turmaId?: string;
+  notas?: Nota[];
+  frequencias?: Frequencia[];
+}
+
+export interface Nota {
+  id?: string;
+  valor: number;
+  tipoAvaliacao: string;
+  dataAvaliacao: string;
+  observacao?: string;
+  disciplina?: {
+    id: string;
+    nome: string;
+    professor?: {
+      nome: string;
+    };
+  };
+}
+
+export interface Frequencia {
+  id?: string;
+  dataAula: string;
+  presente: boolean;
+  observacao?: string;
+  disciplina?: {
+    id: string;
+    nome: string;
+  };
+}
+
+export interface FrequenciaResumo {
+  disciplina: string;
+  totalAulas: number;
+  presencas: number;
+  faltas: number;
+  percentual: number;
 }
 
 export interface Turma {
@@ -16,6 +52,7 @@ export interface Turma {
   nome: string;
   anoLetivo: number;
   serie: string;
+  ano?: string; // Adicionando propriedade ano
   alunos?: Aluno[];
   disciplinas?: Disciplina[];
 }

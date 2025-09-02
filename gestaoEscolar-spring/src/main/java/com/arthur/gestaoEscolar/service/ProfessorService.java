@@ -7,6 +7,7 @@ import com.arthur.gestaoEscolar.model.repository.ProfessorRepository;
 import com.arthur.gestaoEscolar.model.repository.DisciplinaRepository;
 import com.arthur.gestaoEscolar.exception.GestaoEscolarException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,9 @@ public class ProfessorService {
 
     @Autowired
     private DisciplinaRepository disciplinaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Professor buscarPorId(String id) throws GestaoEscolarException {
         return this.professorRepository.findById(id)
@@ -53,6 +57,11 @@ public class ProfessorService {
     public Professor salvar(Professor professor) throws GestaoEscolarException {
         this.verificarCpfJaUtilizado(professor.getCpf(), professor.getId());
         
+        // Criptografar a senha se fornecida
+        if (professor.getSenha() != null && !professor.getSenha().trim().isEmpty()) {
+            professor.setSenha(passwordEncoder.encode(professor.getSenha()));
+        }
+        
         return professorRepository.save(professor);
     }
 
@@ -69,6 +78,11 @@ public class ProfessorService {
         
         // Verificar CPF
         this.verificarCpfJaUtilizado(professor.getCpf(), null);
+        
+        // Criptografar a senha se fornecida
+        if (professor.getSenha() != null && !professor.getSenha().trim().isEmpty()) {
+            professor.setSenha(passwordEncoder.encode(professor.getSenha()));
+        }
         
         // Salvar o professor
         Professor professorSalvo = professorRepository.save(professor);

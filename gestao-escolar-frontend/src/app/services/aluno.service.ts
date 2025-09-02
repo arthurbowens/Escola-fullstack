@@ -34,6 +34,11 @@ export class AlunoService {
     return this.http.get<Aluno>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 
+  getMeusDados(): Observable<Aluno> {
+    console.log('🔍 Buscando meus dados de aluno');
+    return this.http.get<Aluno>(`${this.API_URL}/me`, { headers: this.getHeaders() });
+  }
+
   createAluno(aluno: AlunoDTO): Observable<Aluno> {
     return this.http.post<Aluno>(this.API_URL, aluno, { headers: this.getHeaders() });
   }

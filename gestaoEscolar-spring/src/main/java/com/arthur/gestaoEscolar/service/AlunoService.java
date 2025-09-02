@@ -6,6 +6,7 @@ import com.arthur.gestaoEscolar.model.repository.AlunoRepository;
 import com.arthur.gestaoEscolar.model.repository.TurmaRepository;
 import com.arthur.gestaoEscolar.exception.GestaoEscolarException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,9 @@ public class AlunoService {
 
     @Autowired
     private TurmaRepository turmaRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public Aluno buscarPorId(String id) throws GestaoEscolarException {
         return this.alunoRepository.findById(id)
@@ -38,6 +42,11 @@ public class AlunoService {
                 .orElseThrow(() -> new GestaoEscolarException("Aluno não encontrado pela matrícula"));
     }
 
+    public Aluno buscarPorEmail(String email) throws GestaoEscolarException {
+        return this.alunoRepository.findByEmail(email)
+                .orElseThrow(() -> new GestaoEscolarException("Aluno não encontrado pelo email"));
+    }
+
     public List<Aluno> buscarPorTurma(String turmaId) throws GestaoEscolarException {
         List<Aluno> alunos = this.alunoRepository.findByTurmaIdOrderByNome(turmaId);
         if (alunos.isEmpty()) {
@@ -54,6 +63,11 @@ public class AlunoService {
             this.verificarTurmaExiste(aluno.getTurma().getId());
         } else {
             throw new GestaoEscolarException("Turma é obrigatória para cadastrar um aluno");
+        }
+        
+        // Criptografar a senha se fornecida
+        if (aluno.getSenha() != null && !aluno.getSenha().trim().isEmpty()) {
+            aluno.setSenha(passwordEncoder.encode(aluno.getSenha()));
         }
         
         return alunoRepository.save(aluno);

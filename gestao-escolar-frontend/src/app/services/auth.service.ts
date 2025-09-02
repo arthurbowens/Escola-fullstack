@@ -2,7 +2,15 @@ import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
+import { jwtDecode } from 'jwt-decode';
 import { Usuario, LoginRequest, LoginResponse, TipoUsuario } from '../models/usuario.model';
+
+interface JwtPayload {
+  sub: string; // email
+  tipoUsuario: string;
+  iat: number;
+  exp: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -40,35 +48,42 @@ export class AuthService {
           console.log('🎫 Token recebido do backend:', token);
           console.log('🎫 Tipo do token:', typeof token);
           
-          // Criar usuário mock baseado no email
-          const mockUser: Usuario = {
-            id: '1',
+          // Decodificar o JWT para obter informações do usuário
+          const payload = jwtDecode<JwtPayload>(token);
+          console.log('🔍 Payload do JWT:', payload);
+          
+          // Criar usuário baseado no JWT
+          const user: Usuario = {
+            id: payload.sub, // Usar email como ID temporário
             nome: credentials.email.split('@')[0], // Usar parte do email como nome
-            email: credentials.email,
-            tipoUsuario: TipoUsuario.ADMINISTRADOR // Assumir que é admin por enquanto
+            email: payload.sub,
+            tipoUsuario: payload.tipoUsuario as TipoUsuario
           };
+          
+          console.log('👤 Usuário criado:', user);
           
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('token', token);
-            localStorage.setItem('currentUser', JSON.stringify(mockUser));
+            localStorage.setItem('currentUser', JSON.stringify(user));
           }
-          this.currentUserSubject.next(mockUser);
+          this.currentUserSubject.next(user);
         }),
         map(token => {
-          // O token já é uma string pura
+          // Decodificar o JWT para obter informações do usuário
+          const payload = jwtDecode<JwtPayload>(token);
           
-          // Retornar objeto LoginResponse compatível
-          const mockUser: Usuario = {
-            id: '1',
+          // Criar usuário baseado no JWT
+          const user: Usuario = {
+            id: payload.sub,
             nome: credentials.email.split('@')[0],
-            email: credentials.email,
-            tipoUsuario: TipoUsuario.ADMINISTRADOR
+            email: payload.sub,
+            tipoUsuario: payload.tipoUsuario as TipoUsuario
           };
           
           return {
             token: token,
-            usuario: mockUser,
-            tipoUsuario: TipoUsuario.ADMINISTRADOR
+            usuario: user,
+            tipoUsuario: payload.tipoUsuario as TipoUsuario
           };
         })
       );

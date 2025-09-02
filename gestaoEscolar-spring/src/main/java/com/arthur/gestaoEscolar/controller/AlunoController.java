@@ -46,6 +46,17 @@ public class AlunoController {
         }
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('ALUNO')")
+    public ResponseEntity<AlunoDTO> buscarMeusDados() {
+        try {
+            Aluno aluno = alunoService.buscarPorEmail(org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication().getName());
+            return ResponseEntity.ok(new AlunoDTO(aluno));
+        } catch (GestaoEscolarException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping("/matricula/{matricula}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR')")
     public ResponseEntity<AlunoDTO> buscarPorMatricula(@PathVariable String matricula) {

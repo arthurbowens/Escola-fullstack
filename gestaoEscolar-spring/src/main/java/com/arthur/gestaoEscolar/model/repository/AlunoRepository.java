@@ -15,6 +15,8 @@ public interface AlunoRepository extends JpaRepository<Aluno, String>, JpaSpecif
 
     Optional<Aluno> findByMatricula(String matricula);
 
+    Optional<Aluno> findByEmail(String email);
+
     boolean existsByMatricula(String matricula);
 
     boolean existsByMatriculaAndIdNot(String matricula, String id);
