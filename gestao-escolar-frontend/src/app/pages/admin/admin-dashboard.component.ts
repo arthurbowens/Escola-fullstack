@@ -38,24 +38,34 @@ export class AdminDashboardComponent implements OnInit {
     // Carregar turmas primeiro para poder fazer a busca
     this.turmaService.getTurmas().subscribe({
       next: (turmas) => {
-        this.turmas = turmas;
+        this.turmas = turmas || [];
         this.totalTurmas = turmas.length;
         
         // Depois carregar alunos
         this.alunoService.getAlunos().subscribe({
           next: (alunos) => {
-            this.alunos = alunos;
+            this.alunos = alunos || [];
             this.totalAlunos = alunos.length;
             this.loading = false;
           },
           error: (error) => {
             console.error('Erro ao carregar alunos:', error);
+            // Se for erro 404 ou similar, tratar como estado vazio
+            if (error.status === 404 || error.status === 403) {
+              this.alunos = [];
+              this.totalAlunos = 0;
+            }
             this.loading = false;
           }
         });
       },
       error: (error) => {
         console.error('Erro ao carregar turmas:', error);
+        // Se for erro 404 ou similar, tratar como estado vazio
+        if (error.status === 404 || error.status === 403) {
+          this.turmas = [];
+          this.totalTurmas = 0;
+        }
         this.loading = false;
       }
     });

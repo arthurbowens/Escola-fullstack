@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { TurmaService } from '../../../services/turma.service';
 import { AlunoService } from '../../../services/aluno.service';
 import { DisciplinaService } from '../../../services/disciplina.service';
@@ -38,7 +38,8 @@ export class TurmasListComponent implements OnInit {
     private turmaService: TurmaService,
     private alunoService: AlunoService,
     private disciplinaService: DisciplinaService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -51,16 +52,26 @@ export class TurmasListComponent implements OnInit {
 
     this.turmaService.getTurmas().subscribe({
       next: (turmas) => {
-        this.turmas = turmas;
+        this.turmas = turmas || [];
         this.loading = false;
-        console.log('✅ Turmas carregadas:', turmas);
+        console.log('✅ Turmas carregadas:', turmas.map(t => ({ nome: t.nome, serie: t.serie })));
       },
       error: (error) => {
         console.error('❌ Erro ao carregar turmas:', error);
-        this.error = 'Erro ao carregar turmas';
+        // Se for erro 404 ou similar, tratar como estado vazio
+        if (error.status === 404 || error.status === 403) {
+          this.turmas = [];
+          this.error = '';
+        } else {
+          this.error = 'Erro ao carregar turmas. Tente novamente.';
+        }
         this.loading = false;
       }
     });
+  }
+
+  editTurma(turmaId: string): void {
+    this.router.navigate(['/admin/turmas/editar', turmaId]);
   }
 
   async deleteTurma(id: string): Promise<void> {
@@ -104,7 +115,7 @@ export class TurmasListComponent implements OnInit {
     if (this.searchTerm) {
       filtered = filtered.filter(turma =>
         turma.nome.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-        turma.serie.toLowerCase().includes(this.searchTerm.toLowerCase())
+        (turma.serie && turma.serie.toLowerCase().includes(this.searchTerm.toLowerCase()))
       );
     }
 

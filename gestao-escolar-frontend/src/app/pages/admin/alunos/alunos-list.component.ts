@@ -39,13 +39,19 @@ export class AlunosListComponent implements OnInit {
 
     this.alunoService.getAlunos().subscribe({
       next: (alunos) => {
-        this.alunos = alunos;
+        this.alunos = alunos || [];
         this.loading = false;
         console.log('✅ Alunos carregados:', alunos);
       },
       error: (error) => {
         console.error('❌ Erro ao carregar alunos:', error);
-        this.error = 'Erro ao carregar alunos';
+        // Se for erro 404 ou similar, tratar como estado vazio
+        if (error.status === 404 || error.status === 403) {
+          this.alunos = [];
+          this.error = '';
+        } else {
+          this.error = 'Erro ao carregar alunos. Tente novamente.';
+        }
         this.loading = false;
       }
     });
@@ -54,11 +60,15 @@ export class AlunosListComponent implements OnInit {
   loadTurmas(): void {
     this.turmaService.getTurmas().subscribe({
       next: (turmas) => {
-        this.turmas = turmas;
+        this.turmas = turmas || [];
         console.log('✅ Turmas carregadas:', turmas);
       },
       error: (error) => {
         console.error('❌ Erro ao carregar turmas:', error);
+        // Se for erro 404 ou similar, tratar como estado vazio
+        if (error.status === 404 || error.status === 403) {
+          this.turmas = [];
+        }
       }
     });
   }

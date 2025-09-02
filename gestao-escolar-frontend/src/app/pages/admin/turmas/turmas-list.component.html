@@ -130,7 +130,7 @@
               Ver Detalhes
             </button>
             <button 
-              [routerLink]="['/admin/turmas/editar', turma.id]"
+              (click)="editTurma(turma.id!)"
               class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm action-button"
             >
               Editar
