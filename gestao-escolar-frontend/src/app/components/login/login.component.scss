@@ -1,0 +1,18 @@
+// Estilos customizados para o componente de login
+// A maioria dos estilos está sendo feita com Tailwind CSS
+
+.form-input:focus {
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.btn-primary {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
