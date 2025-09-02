@@ -76,6 +76,27 @@ export class FrequenciaService {
     });
   }
 
+  createFrequencia(frequencia: Frequencia): Observable<Frequencia> {
+    console.log('📅 Criando frequência:', frequencia);
+    return this.http.post<Frequencia>(`${this.API_URL}/frequencias`, frequencia, {
+      headers: this.getHeaders()
+    });
+  }
+
+  updateFrequencia(id: string, frequencia: Frequencia): Observable<Frequencia> {
+    console.log('📅 Atualizando frequência:', id, frequencia);
+    return this.http.put<Frequencia>(`${this.API_URL}/frequencias/${id}`, frequencia, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteFrequencia(id: string): Observable<void> {
+    console.log('📅 Deletando frequência:', id);
+    return this.http.delete<void>(`${this.API_URL}/frequencias/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
+
   // Método para processar frequências e criar resumo por disciplina
   processarFrequencias(frequencias: Frequencia[]): FrequenciaResumo[] {
     const resumoPorDisciplina = new Map<string, FrequenciaResumo>();

@@ -1,0 +1,315 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center py-6">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">Portal do Professor</h1>
+          <p class="text-sm text-gray-500">Lance notas e frequências dos alunos</p>
+        </div>
+        <div class="flex items-center space-x-4">
+          <div class="text-right">
+            <p class="text-sm font-medium text-gray-900">{{ professor?.nome }}</p>
+            <p class="text-xs text-gray-500">{{ professor?.formacaoAcademica }}</p>
+          </div>
+          <div class="flex space-x-2">
+            <button
+              (click)="openChangePasswordModal()"
+              class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium border border-blue-200 flex items-center space-x-2"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path>
+              </svg>
+              <span>Alterar Senha</span>
+            </button>
+            <button
+              (click)="logout()"
+              class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium border border-red-200 flex items-center space-x-2"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+              </svg>
+              <span>Sair</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center items-center py-12">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
+      {{ error }}
+    </div>
+
+    <!-- Content -->
+    <div *ngIf="!loading && !error && professor">
+      <!-- Seleção de Disciplina, Turma e Aluno -->
+      <div class="bg-white shadow rounded-lg mb-8">
+        <div class="px-4 py-5 sm:p-6">
+          <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Selecionar Disciplina, Turma e Aluno</h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Disciplina -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Disciplina</label>
+              <select
+                [(ngModel)]="disciplinaSelecionada"
+                (change)="onDisciplinaChange()"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Selecione uma disciplina</option>
+                <option *ngFor="let disciplina of disciplinas" [ngValue]="disciplina">
+                  {{ disciplina.nome }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Turma -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Turma</label>
+              <select
+                [(ngModel)]="turmaSelecionada"
+                (change)="onTurmaChange()"
+                [disabled]="!disciplinaSelecionada"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">Selecione uma turma</option>
+                <option *ngFor="let turma of turmas" [ngValue]="turma">
+                  {{ turma.nome }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Aluno -->
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Aluno</label>
+              <select
+                [(ngModel)]="alunoSelecionado"
+                (change)="onAlunoChange()"
+                [disabled]="!turmaSelecionada"
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">Selecione um aluno</option>
+                <option *ngFor="let aluno of alunos" [ngValue]="aluno">
+                  {{ aluno.nome }} ({{ aluno.matricula }})
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Resumo da Seleção -->
+          <div *ngIf="disciplinaSelecionada && turmaSelecionada && alunoSelecionado" class="mt-6 p-4 bg-blue-50 rounded-lg">
+            <h4 class="text-sm font-medium text-blue-900 mb-2">Seleção Atual:</h4>
+            <p class="text-sm text-blue-700">
+              <strong>Disciplina:</strong> {{ disciplinaSelecionada.nome }} |
+              <strong>Turma:</strong> {{ turmaSelecionada.nome }} |
+              <strong>Aluno:</strong> {{ alunoSelecionado.nome }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs para Notas e Frequência -->
+      <div *ngIf="alunoSelecionado" class="bg-white shadow rounded-lg">
+        <div class="border-b border-gray-200">
+          <nav class="-mb-px flex space-x-8 px-6">
+            <button
+              (click)="setActiveTab('notas')"
+              [class]="activeTab === 'notas' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+              📊 Lançar Notas
+            </button>
+            <button
+              (click)="setActiveTab('frequencia')"
+              [class]="activeTab === 'frequencia' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+              class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
+            >
+              📅 Marcar Frequência
+            </button>
+          </nav>
+        </div>
+
+        <div class="p-6">
+          <!-- Tab de Notas -->
+          <div *ngIf="activeTab === 'notas'">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Lançar Nota</h3>
+            
+            <form (ngSubmit)="lancarNota()" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Valor da Nota</label>
+                  <input
+                    type="number"
+                    [(ngModel)]="novaNota.valor"
+                    name="valor"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Avaliação</label>
+                  <select
+                    [(ngModel)]="novaNota.tipoAvaliacao"
+                    name="tipoAvaliacao"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="PROVA">Prova</option>
+                    <option value="TRABALHO">Trabalho</option>
+                    <option value="PROJETO">Projeto</option>
+                    <option value="APRESENTACAO">Apresentação</option>
+                    <option value="PARTICIPACAO">Participação</option>
+                    <option value="OUTRO">Outro</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Data da Avaliação</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="novaNota.dataAvaliacao"
+                    name="dataAvaliacao"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Observação (opcional)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="novaNota.observacao"
+                    name="observacao"
+                    placeholder="Ex: Prova bimestral"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="loading"
+                class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              >
+                <svg *ngIf="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ loading ? 'Lançando...' : 'Lançar Nota' }}</span>
+              </button>
+            </form>
+
+            <!-- Histórico de Notas -->
+            <div *ngIf="notas.length > 0" class="mt-8">
+              <h4 class="text-md font-medium text-gray-900 mb-4">Histórico de Notas</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let nota of notas" class="bg-gray-50 p-4 rounded-lg">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-sm font-medium text-gray-900">{{ nota.tipoAvaliacao }}</span>
+                    <span class="text-lg font-bold text-blue-600">{{ nota.valor | number:'1.1-1' }}</span>
+                  </div>
+                  <div class="text-xs text-gray-500">{{ nota.dataAvaliacao | date:'dd/MM/yyyy' }}</div>
+                  <div *ngIf="nota.observacao" class="text-xs text-gray-600 mt-1">{{ nota.observacao }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab de Frequência -->
+          <div *ngIf="activeTab === 'frequencia'">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Marcar Frequência</h3>
+            
+            <form (ngSubmit)="marcarFrequencia()" class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Data da Aula</label>
+                  <input
+                    type="date"
+                    [(ngModel)]="novaFrequencia.dataAula"
+                    name="dataAula"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                  <select
+                    [(ngModel)]="novaFrequencia.presente"
+                    name="presente"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option [ngValue]="true">Presente</option>
+                    <option [ngValue]="false">Faltou</option>
+                  </select>
+                </div>
+
+                <div class="md:col-span-2">
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Observação (opcional)</label>
+                  <input
+                    type="text"
+                    [(ngModel)]="novaFrequencia.observacao"
+                    name="observacao"
+                    placeholder="Ex: Aula de revisão"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                [disabled]="loading"
+                class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
+              >
+                <svg *ngIf="loading" class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>{{ loading ? 'Marcando...' : 'Marcar Frequência' }}</span>
+              </button>
+            </form>
+
+            <!-- Histórico de Frequências -->
+            <div *ngIf="frequencias.length > 0" class="mt-8">
+              <h4 class="text-md font-medium text-gray-900 mb-4">Histórico de Frequências</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let freq of frequencias" class="bg-gray-50 p-4 rounded-lg">
+                  <div class="flex justify-between items-start mb-2">
+                    <span class="text-sm font-medium text-gray-900">{{ freq.dataAula | date:'dd/MM/yyyy' }}</span>
+                    <span 
+                      class="px-2 py-1 rounded-full text-xs font-medium"
+                      [ngClass]="freq.presente ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    >
+                      {{ freq.presente ? 'Presente' : 'Faltou' }}
+                    </span>
+                  </div>
+                  <div *ngIf="freq.observacao" class="text-xs text-gray-600 mt-1">{{ freq.observacao }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de Alteração de Senha -->
+  <app-change-password
+    *ngIf="showChangePasswordModal"
+    userType="professor"
+    (passwordChanged)="onPasswordChanged($event)"
+  ></app-change-password>
+</div>

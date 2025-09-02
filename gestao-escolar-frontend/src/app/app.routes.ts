@@ -11,6 +11,7 @@ import { DisciplinasListComponent } from './pages/admin/disciplinas/disciplinas-
 import { DisciplinaFormComponent } from './pages/admin/disciplinas/disciplina-form.component';
 import { RelatoriosComponent } from './pages/admin/relatorios/relatorios.component';
 import { AlunoDashboardComponent } from './pages/aluno/aluno-dashboard.component';
+import { ProfessorDashboardComponent } from './pages/professor/professor-dashboard.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -30,6 +31,7 @@ export const routes: Routes = [
   { path: 'admin/disciplinas/editar/:id', component: DisciplinaFormComponent },
   { path: 'admin/relatorios', component: RelatoriosComponent },
   { path: 'aluno', component: AlunoDashboardComponent },
+  { path: 'professor', component: ProfessorDashboardComponent },
   // Rotas futuras serão adicionadas aqui
   { path: '**', redirectTo: '/login' }
 ];

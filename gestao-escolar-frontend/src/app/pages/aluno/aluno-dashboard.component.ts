@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { ChangePasswordComponent } from '../../components/change-password/change-password.component';
 import { AuthService } from '../../services/auth.service';
 import { AlunoService } from '../../services/aluno.service';
 import { NotaService } from '../../services/nota.service';
@@ -11,7 +12,7 @@ import { Aluno, Nota, Frequencia, FrequenciaResumo } from '../../models/aluno.mo
 @Component({
   selector: 'app-aluno-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ChangePasswordComponent],
   templateUrl: './aluno-dashboard.component.html',
   styleUrls: ['./aluno-dashboard.component.scss']
 })
@@ -22,6 +23,7 @@ export class AlunoDashboardComponent implements OnInit {
   frequenciasResumo: FrequenciaResumo[] = [];
   loading = false;
   error = '';
+  showChangePasswordModal = false;
 
   constructor(
     private authService: AuthService,
@@ -158,6 +160,18 @@ export class AlunoDashboardComponent implements OnInit {
     
     const soma = this.frequenciasResumo.reduce((acc, f) => acc + f.percentual, 0);
     return soma / this.frequenciasResumo.length;
+  }
+
+  openChangePasswordModal(): void {
+    this.showChangePasswordModal = true;
+  }
+
+  onPasswordChanged(success: boolean): void {
+    this.showChangePasswordModal = false;
+    if (success) {
+      // Opcional: mostrar mensagem de sucesso
+      console.log('Senha alterada com sucesso!');
+    }
   }
 
   logout(): void {

@@ -57,4 +57,25 @@ export class NotaService {
       headers: this.getHeaders()
     });
   }
+
+  createNota(nota: Nota): Observable<Nota> {
+    console.log('📊 Criando nota:', nota);
+    return this.http.post<Nota>(`${this.API_URL}/notas`, nota, {
+      headers: this.getHeaders()
+    });
+  }
+
+  updateNota(id: string, nota: Nota): Observable<Nota> {
+    console.log('📊 Atualizando nota:', id, nota);
+    return this.http.put<Nota>(`${this.API_URL}/notas/${id}`, nota, {
+      headers: this.getHeaders()
+    });
+  }
+
+  deleteNota(id: string): Observable<void> {
+    console.log('📊 Deletando nota:', id);
+    return this.http.delete<void>(`${this.API_URL}/notas/${id}`, {
+      headers: this.getHeaders()
+    });
+  }
 }
