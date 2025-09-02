@@ -1,0 +1,14 @@
+// Estilos customizados para a navegação do administrador
+// A maioria dos estilos está sendo feita com Tailwind CSS
+
+.nav-link {
+  transition: all 0.2s ease-in-out;
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.nav-menu {
+  transition: opacity 0.3s ease-in-out;
+}

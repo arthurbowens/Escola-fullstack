@@ -8,7 +8,7 @@ import { Usuario, LoginRequest, LoginResponse, TipoUsuario } from '../models/usu
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = 'http://localhost:8080/gestaoEscolar/api';
   private currentUserSubject = new BehaviorSubject<Usuario | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -29,9 +29,13 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
+    console.log('🔗 Fazendo requisição para:', `${this.API_URL}/auth/login`);
+    
     return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, credentials)
       .pipe(
         tap(response => {
+          console.log('✅ Resposta do backend:', response);
+          
           if (isPlatformBrowser(this.platformId)) {
             localStorage.setItem('token', response.token);
             localStorage.setItem('currentUser', JSON.stringify(response.usuario));
