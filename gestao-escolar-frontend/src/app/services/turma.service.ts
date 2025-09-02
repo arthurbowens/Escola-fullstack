@@ -30,19 +30,23 @@ export class TurmaService {
     return this.http.get<Turma[]>(this.API_URL, { headers });
   }
 
-  getTurmaById(id: number): Observable<Turma> {
+  getTurmaById(id: string): Observable<Turma> {
     return this.http.get<Turma>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
+  }
+
+  getTurmaComDetalhes(id: string): Observable<Turma> {
+    return this.http.get<Turma>(`${this.API_URL}/${id}/detalhes`, { headers: this.getHeaders() });
   }
 
   createTurma(turma: Turma): Observable<Turma> {
     return this.http.post<Turma>(this.API_URL, turma, { headers: this.getHeaders() });
   }
 
-  updateTurma(id: number, turma: Turma): Observable<Turma> {
+  updateTurma(id: string, turma: Turma): Observable<Turma> {
     return this.http.put<Turma>(`${this.API_URL}/${id}`, turma, { headers: this.getHeaders() });
   }
 
-  deleteTurma(id: number): Observable<void> {
+  deleteTurma(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 }

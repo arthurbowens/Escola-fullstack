@@ -20,14 +20,14 @@ export class AlunoFormComponent implements OnInit {
     dataNascimento: '',
     email: '',
     senha: '',
-    turmaId: 0
+    turmaId: ''
   };
 
   turmas: Turma[] = [];
   loading = false;
   error = '';
   isEditMode = false;
-  alunoId: number | null = null;
+  alunoId: string | null = null;
 
   constructor(
     private alunoService: AlunoService,
@@ -45,12 +45,12 @@ export class AlunoFormComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
-      this.alunoId = +id;
+      this.alunoId = id;
       this.loadAluno(this.alunoId);
     }
   }
 
-  private loadAluno(id: number): void {
+  private loadAluno(id: string): void {
     this.loading = true;
     this.alunoService.getAlunoById(id).subscribe({
       next: (aluno) => {
@@ -60,7 +60,7 @@ export class AlunoFormComponent implements OnInit {
           dataNascimento: aluno.dataNascimento,
           email: aluno.email,
           senha: '', // Senha vazia para edição (não será alterada se não preenchida)
-          turmaId: aluno.turmaId || 0
+          turmaId: aluno.turmaId || ''
         };
         this.loading = false;
       },
@@ -77,7 +77,7 @@ export class AlunoFormComponent implements OnInit {
       next: (turmas) => {
         this.turmas = turmas;
         if (turmas.length > 0 && !this.aluno.turmaId) {
-          this.aluno.turmaId = turmas[0].id || 0;
+          this.aluno.turmaId = turmas[0].id || '';
         }
       },
       error: (error) => {

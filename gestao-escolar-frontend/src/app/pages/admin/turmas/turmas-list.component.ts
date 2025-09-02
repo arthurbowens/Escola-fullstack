@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { TurmaService } from '../../../services/turma.service';
-import { Turma } from '../../../models/aluno.model';
+import { AlunoService } from '../../../services/aluno.service';
+import { DisciplinaService } from '../../../services/disciplina.service';
+import { AlertService } from '../../../services/alert.service';
+import { Turma, Aluno } from '../../../models/aluno.model';
+import { Disciplina } from '../../../models/professor.model';
 
 @Component({
   selector: 'app-turmas-list',
@@ -20,10 +24,22 @@ export class TurmasListComponent implements OnInit {
   selectedSerie: string = '';
   selectedAno: number | null = null;
 
+  // Propriedades para modal de detalhes
+  showDetailsModal = false;
+  selectedTurma: Turma | null = null;
+  turmaAlunos: Aluno[] = [];
+  turmaDisciplinas: Disciplina[] = [];
+  loadingDetails = false;
+
   series = ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano', '6º Ano', '7º Ano', '8º Ano', '9º Ano'];
   anos = [2024, 2025, 2026, 2027, 2028];
 
-  constructor(private turmaService: TurmaService) {}
+  constructor(
+    private turmaService: TurmaService,
+    private alunoService: AlunoService,
+    private disciplinaService: DisciplinaService,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit(): void {
     this.loadTurmas();
@@ -47,16 +63,35 @@ export class TurmasListComponent implements OnInit {
     });
   }
 
-  deleteTurma(id: number): void {
-    if (confirm('Tem certeza que deseja excluir esta turma? Esta ação não pode ser desfeita.')) {
+  async deleteTurma(id: string): Promise<void> {
+    const turma = this.turmas.find(t => t.id === id);
+    const nomeTurma = turma ? turma.nome : 'esta turma';
+    
+    const confirmed = await this.alertService.confirmDelete(
+      'Excluir Turma',
+      `Tem certeza que deseja excluir ${nomeTurma}? Esta ação não pode ser desfeita e todos os alunos desta turma serão afetados.`,
+      'Sim, excluir!'
+    );
+
+    if (confirmed) {
+      this.alertService.loading('Excluindo...', 'Removendo turma do sistema');
+      
       this.turmaService.deleteTurma(id).subscribe({
         next: () => {
-          console.log('✅ Turma excluída com sucesso');
+          this.alertService.closeLoading();
+          this.alertService.success(
+            'Turma Excluída!',
+            `${nomeTurma} foi removida do sistema com sucesso.`
+          );
           this.loadTurmas(); // Recarregar lista
         },
         error: (error) => {
+          this.alertService.closeLoading();
           console.error('❌ Erro ao excluir turma:', error);
-          this.error = 'Erro ao excluir turma';
+          this.alertService.error(
+            'Erro ao Excluir',
+            'Não foi possível excluir a turma. Tente novamente.'
+          );
         }
       });
     }
@@ -86,14 +121,51 @@ export class TurmasListComponent implements OnInit {
     return filtered;
   }
 
-  getTotalAlunos(turmaId: number): number {
-    // TODO: Implementar contagem de alunos quando o serviço estiver disponível
-    return Math.floor(Math.random() * 30) + 10; // Mock temporário
+  getTotalAlunos(turmaId: string): number {
+    const turma = this.turmas.find(t => t.id === turmaId);
+    return turma?.alunos?.length || 0;
   }
 
-  getTotalDisciplinas(turmaId: number): number {
-    // TODO: Implementar contagem de disciplinas quando o serviço estiver disponível
-    return Math.floor(Math.random() * 8) + 4; // Mock temporário
+  getTotalDisciplinas(turmaId: string): number {
+    const turma = this.turmas.find(t => t.id === turmaId);
+    return turma?.disciplinas?.length || 0;
+  }
+
+  showTurmaDetails(turma: Turma): void {
+    this.selectedTurma = turma;
+    this.showDetailsModal = true;
+    this.loadingDetails = true;
+    
+    // Buscar alunos da turma
+    this.alunoService.getAlunos().subscribe({
+      next: (alunos) => {
+        this.turmaAlunos = alunos.filter(aluno => aluno.turmaId === turma.id);
+        this.loadingDetails = false;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar alunos:', error);
+        this.turmaAlunos = [];
+        this.loadingDetails = false;
+      }
+    });
+
+    // Buscar disciplinas da turma
+    this.disciplinaService.getDisciplinasByTurma(turma.id!).subscribe({
+      next: (disciplinas) => {
+        this.turmaDisciplinas = disciplinas;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar disciplinas:', error);
+        this.turmaDisciplinas = [];
+      }
+    });
+  }
+
+  closeDetailsModal(): void {
+    this.showDetailsModal = false;
+    this.selectedTurma = null;
+    this.turmaAlunos = [];
+    this.turmaDisciplinas = [];
   }
 
   limparFiltros(): void {

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { AlunoService } from '../../../services/aluno.service';
 import { TurmaService } from '../../../services/turma.service';
+import { AlertService } from '../../../services/alert.service';
 import { Aluno, Turma } from '../../../models/aluno.model';
 
 @Component({
@@ -19,11 +20,12 @@ export class AlunosListComponent implements OnInit {
   loading = false;
   error = '';
   searchTerm = '';
-  selectedTurma: number | null = null;
+  selectedTurma: string | null = null;
 
   constructor(
     private alunoService: AlunoService,
-    private turmaService: TurmaService
+    private turmaService: TurmaService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -61,16 +63,35 @@ export class AlunosListComponent implements OnInit {
     });
   }
 
-  deleteAluno(id: number): void {
-    if (confirm('Tem certeza que deseja excluir este aluno?')) {
+  async deleteAluno(id: string): Promise<void> {
+    const aluno = this.alunos.find(a => a.id === id);
+    const nomeAluno = aluno ? aluno.nome : 'este aluno';
+    
+    const confirmed = await this.alertService.confirmDelete(
+      'Excluir Aluno',
+      `Tem certeza que deseja excluir ${nomeAluno}? Esta ação não pode ser desfeita.`,
+      'Sim, excluir!'
+    );
+
+    if (confirmed) {
+      this.alertService.loading('Excluindo...', 'Removendo aluno do sistema');
+      
       this.alunoService.deleteAluno(id).subscribe({
         next: () => {
-          console.log('✅ Aluno excluído com sucesso');
+          this.alertService.closeLoading();
+          this.alertService.success(
+            'Aluno Excluído!',
+            `${nomeAluno} foi removido do sistema com sucesso.`
+          );
           this.loadAlunos(); // Recarregar lista
         },
         error: (error) => {
+          this.alertService.closeLoading();
           console.error('❌ Erro ao excluir aluno:', error);
-          this.error = 'Erro ao excluir aluno';
+          this.alertService.error(
+            'Erro ao Excluir',
+            'Não foi possível excluir o aluno. Tente novamente.'
+          );
         }
       });
     }
@@ -96,7 +117,7 @@ export class AlunosListComponent implements OnInit {
     return filtered;
   }
 
-  getTurmaNome(turmaId: number | undefined): string {
+  getTurmaNome(turmaId: string | undefined): string {
     if (!turmaId) return 'N/A';
     const turma = this.turmas.find(t => t.id === turmaId);
     return turma ? turma.nome : 'N/A';

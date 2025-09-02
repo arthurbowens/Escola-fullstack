@@ -22,7 +22,7 @@ export class TurmaFormComponent implements OnInit {
   loading = false;
   error = '';
   isEditMode = false;
-  turmaId: number | null = null;
+  turmaId: string | null = null;
 
   series = ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano', '6º Ano', '7º Ano', '8º Ano', '9º Ano'];
   anos = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
@@ -41,12 +41,12 @@ export class TurmaFormComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEditMode = true;
-      this.turmaId = +id;
+      this.turmaId = id;
       this.loadTurma(this.turmaId);
     }
   }
 
-  private loadTurma(id: number): void {
+  private loadTurma(id: string): void {
     this.loading = true;
     this.turmaService.getTurmaById(id).subscribe({
       next: (turma) => {

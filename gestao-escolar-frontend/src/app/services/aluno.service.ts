@@ -30,7 +30,7 @@ export class AlunoService {
     return this.http.get<Aluno[]>(this.API_URL, { headers });
   }
 
-  getAlunoById(id: number): Observable<Aluno> {
+  getAlunoById(id: string): Observable<Aluno> {
     return this.http.get<Aluno>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 
@@ -38,11 +38,11 @@ export class AlunoService {
     return this.http.post<Aluno>(this.API_URL, aluno, { headers: this.getHeaders() });
   }
 
-  updateAluno(id: number, aluno: AlunoDTO): Observable<Aluno> {
+  updateAluno(id: string, aluno: AlunoDTO): Observable<Aluno> {
     return this.http.put<Aluno>(`${this.API_URL}/${id}`, aluno, { headers: this.getHeaders() });
   }
 
-  deleteAluno(id: number): Observable<void> {
+  deleteAluno(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 }

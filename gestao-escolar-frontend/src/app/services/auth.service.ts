@@ -31,15 +31,18 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     console.log('🔗 Fazendo requisição para:', `${this.API_URL}/auth/login`);
     
-    // O backend retorna apenas o token, então vamos criar um usuário mock
-    return this.http.post<string>(`${this.API_URL}/auth/login`, credentials)
+    // O backend retorna apenas o token como string pura
+    return this.http.post(`${this.API_URL}/auth/login`, credentials, { 
+      responseType: 'text' 
+    })
       .pipe(
         tap(token => {
-          console.log('🎫 Token recebido:', token);
+          console.log('🎫 Token recebido do backend:', token);
+          console.log('🎫 Tipo do token:', typeof token);
           
           // Criar usuário mock baseado no email
           const mockUser: Usuario = {
-            id: 1,
+            id: '1',
             nome: credentials.email.split('@')[0], // Usar parte do email como nome
             email: credentials.email,
             tipoUsuario: TipoUsuario.ADMINISTRADOR // Assumir que é admin por enquanto
@@ -52,9 +55,11 @@ export class AuthService {
           this.currentUserSubject.next(mockUser);
         }),
         map(token => {
+          // O token já é uma string pura
+          
           // Retornar objeto LoginResponse compatível
           const mockUser: Usuario = {
-            id: 1,
+            id: '1',
             nome: credentials.email.split('@')[0],
             email: credentials.email,
             tipoUsuario: TipoUsuario.ADMINISTRADOR

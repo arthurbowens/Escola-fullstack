@@ -132,7 +132,12 @@
     <div class="bg-white shadow rounded-lg">
       <div class="px-4 py-5 sm:p-6">
         <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Alunos Recentes</h3>
-        <div class="overflow-x-auto">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        </div>
+
+        <div *ngIf="!loading" class="overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -147,11 +152,43 @@
               <tr *ngFor="let aluno of alunos.slice(0, 5)" class="table-row">
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ aluno.nome }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ aluno.matricula }}</td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ aluno.turma?.nome || 'N/A' }}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ getTurmaNome(aluno.turmaId) }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ aluno.email }}</td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button class="text-indigo-600 hover:text-indigo-900 mr-3">Editar</button>
-                  <button class="text-red-600 hover:text-red-900">Excluir</button>
+                  <button 
+                    (click)="editAluno(aluno.id!)"
+                    class="text-indigo-600 hover:text-indigo-900 mr-3 transition-colors"
+                  >
+                    Editar
+                  </button>
+                  <button 
+                    (click)="deleteAluno(aluno.id!)"
+                    class="text-red-600 hover:text-red-900 transition-colors"
+                  >
+                    Excluir
+                  </button>
+                </td>
+              </tr>
+              
+              <!-- Empty State -->
+              <tr *ngIf="alunos.length === 0">
+                <td colspan="5" class="px-6 py-12 text-center text-sm text-gray-500">
+                  <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                  </svg>
+                  <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhum aluno cadastrado</h3>
+                  <p class="mt-1 text-sm text-gray-500">Comece adicionando um novo aluno ao sistema.</p>
+                  <div class="mt-6">
+                    <button 
+                      routerLink="/admin/alunos/novo"
+                      class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Novo Aluno
+                    </button>
+                  </div>
                 </td>
               </tr>
             </tbody>

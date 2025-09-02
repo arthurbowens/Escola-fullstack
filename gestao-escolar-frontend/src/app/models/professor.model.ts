@@ -1,5 +1,5 @@
 export interface Professor {
-  id?: number;
+  id?: string;
   nome: string;
   cpf: string;
   email: string;
@@ -7,11 +7,11 @@ export interface Professor {
 }
 
 export interface Disciplina {
-  id?: number;
+  id?: string;
   nome: string;
   cargaHoraria: number;
   professor?: Professor;
-  professorId?: number;
+  professorId?: string;
 }
 
 export interface ProfessorDTO {

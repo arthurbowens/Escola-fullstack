@@ -124,6 +124,12 @@
           <!-- Actions -->
           <div class="flex space-x-2 pt-4 border-t border-gray-200">
             <button 
+              (click)="showTurmaDetails(turma)"
+              class="flex-1 bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors text-sm action-button"
+            >
+              Ver Detalhes
+            </button>
+            <button 
               [routerLink]="['/admin/turmas/editar', turma.id]"
               class="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm action-button"
             >
@@ -162,4 +168,107 @@
       </div>
     </div>
   </main>
+
+  <!-- Modal de Detalhes da Turma -->
+  <div *ngIf="showDetailsModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" (click)="closeDetailsModal()">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" (click)="$event.stopPropagation()">
+      <!-- Header do Modal -->
+      <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">
+          Detalhes da Turma: {{ selectedTurma?.nome }}
+        </h3>
+        <button 
+          (click)="closeDetailsModal()"
+          class="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Conteúdo do Modal -->
+      <div class="mt-6">
+        <!-- Informações da Turma -->
+        <div class="bg-gray-50 p-4 rounded-lg mb-6">
+          <h4 class="font-medium text-gray-900 mb-2">Informações da Turma</h4>
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-gray-600">Série:</span>
+              <span class="ml-2 font-medium">{{ selectedTurma?.serie }}</span>
+            </div>
+            <div>
+              <span class="text-gray-600">Ano Letivo:</span>
+              <span class="ml-2 font-medium">{{ selectedTurma?.anoLetivo }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="loadingDetails" class="flex justify-center items-center py-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+        </div>
+
+        <!-- Alunos -->
+        <div *ngIf="!loadingDetails" class="mb-6">
+          <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+            <svg class="h-5 w-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+            </svg>
+            Alunos ({{ turmaAlunos.length }})
+          </h4>
+          <div class="bg-white border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+            <div *ngIf="turmaAlunos.length === 0" class="p-4 text-center text-gray-500">
+              Nenhum aluno cadastrado nesta turma
+            </div>
+            <div *ngFor="let aluno of turmaAlunos" class="p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="font-medium text-gray-900">{{ aluno.nome }}</div>
+                  <div class="text-sm text-gray-500">Matrícula: {{ aluno.matricula }}</div>
+                </div>
+                <div class="text-sm text-gray-500">{{ aluno.email }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Disciplinas -->
+        <div *ngIf="!loadingDetails">
+          <h4 class="font-medium text-gray-900 mb-3 flex items-center">
+            <svg class="h-5 w-5 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            Disciplinas ({{ turmaDisciplinas.length }})
+          </h4>
+          <div class="bg-white border border-gray-200 rounded-lg max-h-48 overflow-y-auto">
+            <div *ngIf="turmaDisciplinas.length === 0" class="p-4 text-center text-gray-500">
+              Nenhuma disciplina cadastrada nesta turma
+            </div>
+            <div *ngFor="let disciplina of turmaDisciplinas" class="p-3 border-b border-gray-100 last:border-b-0 hover:bg-gray-50">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="font-medium text-gray-900">{{ disciplina.nome }}</div>
+                  <div class="text-sm text-gray-500">{{ disciplina.cargaHoraria }}h/aula</div>
+                </div>
+                <div *ngIf="disciplina.professor" class="text-sm text-gray-500">
+                  Prof: {{ disciplina.professor.nome }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer do Modal -->
+      <div class="flex justify-end pt-4 border-t border-gray-200 mt-6">
+        <button 
+          (click)="closeDetailsModal()"
+          class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
