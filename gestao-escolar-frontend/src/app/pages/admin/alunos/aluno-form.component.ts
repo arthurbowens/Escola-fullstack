@@ -19,6 +19,7 @@ export class AlunoFormComponent implements OnInit {
     matricula: '',
     dataNascimento: '',
     email: '',
+    senha: '',
     turmaId: 0
   };
 
@@ -58,6 +59,7 @@ export class AlunoFormComponent implements OnInit {
           matricula: aluno.matricula,
           dataNascimento: aluno.dataNascimento,
           email: aluno.email,
+          senha: '', // Senha vazia para edição (não será alterada se não preenchida)
           turmaId: aluno.turmaId || 0
         };
         this.loading = false;
@@ -101,7 +103,15 @@ export class AlunoFormComponent implements OnInit {
   }
 
   private createAluno(): void {
-    this.alunoService.createAluno(this.aluno).subscribe({
+    // Converter turmaId em objeto Turma para o backend
+    const alunoParaEnviar = {
+      ...this.aluno,
+      turma: this.aluno.turmaId ? { id: this.aluno.turmaId } : null
+    };
+
+    console.log('📤 Enviando aluno para o backend:', alunoParaEnviar);
+
+    this.alunoService.createAluno(alunoParaEnviar).subscribe({
       next: (aluno) => {
         console.log('✅ Aluno criado com sucesso:', aluno);
         this.router.navigate(['/admin/alunos']);
@@ -117,7 +127,41 @@ export class AlunoFormComponent implements OnInit {
   private updateAluno(): void {
     if (!this.alunoId) return;
 
-    this.alunoService.updateAluno(this.alunoId, this.aluno).subscribe({
+    // Converter turmaId em objeto Turma para o backend
+    const alunoParaEnviar = {
+      ...this.aluno,
+      turma: this.aluno.turmaId ? { id: this.aluno.turmaId } : null
+    };
+
+    // Se senha estiver vazia, remover do objeto para não alterar a senha atual
+    if (!alunoParaEnviar.senha.trim()) {
+      const { senha, ...alunoSemSenha } = alunoParaEnviar;
+      // Criar objeto compatível com AlunoDTO sem senha
+      const alunoParaAtualizacao = {
+        nome: alunoSemSenha.nome,
+        matricula: alunoSemSenha.matricula,
+        dataNascimento: alunoSemSenha.dataNascimento,
+        email: alunoSemSenha.email,
+        turmaId: alunoSemSenha.turmaId
+      } as any; // Usar 'any' para contornar a validação TypeScript
+      
+      this.alunoService.updateAluno(this.alunoId, alunoParaAtualizacao).subscribe({
+        next: (aluno) => {
+          console.log('✅ Aluno atualizado com sucesso:', aluno);
+          this.router.navigate(['/admin/alunos']);
+        },
+        error: (error) => {
+          console.error('❌ Erro ao atualizar aluno:', error);
+          this.error = 'Erro ao atualizar aluno';
+          this.loading = false;
+        }
+      });
+      return;
+    }
+
+    console.log('📤 Enviando aluno para atualização:', alunoParaEnviar);
+
+    this.alunoService.updateAluno(this.alunoId, alunoParaEnviar).subscribe({
       next: (aluno) => {
         console.log('✅ Aluno atualizado com sucesso:', aluno);
         this.router.navigate(['/admin/alunos']);
@@ -146,6 +190,12 @@ export class AlunoFormComponent implements OnInit {
       return false;
     }
 
+    // Senha é obrigatória apenas para novos alunos
+    if (!this.isEditMode && !this.aluno.senha.trim()) {
+      this.error = 'Senha é obrigatória';
+      return false;
+    }
+
     if (!this.aluno.dataNascimento) {
       this.error = 'Data de nascimento é obrigatória';
       return false;
@@ -160,6 +210,12 @@ export class AlunoFormComponent implements OnInit {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.aluno.email)) {
       this.error = 'Email inválido';
+      return false;
+    }
+
+    // Validar tamanho mínimo da senha (apenas se senha foi informada)
+    if (this.aluno.senha.trim() && this.aluno.senha.length < 6) {
+      this.error = 'Senha deve ter pelo menos 6 caracteres';
       return false;
     }
 

@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Turma } from '../models/aluno.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
   providedIn: 'root'
@@ -9,25 +10,39 @@ import { Turma } from '../models/aluno.model';
 export class TurmaService {
   private readonly API_URL = 'http://localhost:8080/gestaoEscolar/api/turmas';
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService
+  ) {}
+
+  private getHeaders(): HttpHeaders {
+    const token = this.authService.getToken();
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+  }
 
   getTurmas(): Observable<Turma[]> {
-    return this.http.get<Turma[]>(this.API_URL);
+    const headers = this.getHeaders();
+    console.log('🔑 Headers para turmas:', headers);
+    console.log('🎫 Token atual:', this.authService.getToken());
+    return this.http.get<Turma[]>(this.API_URL, { headers });
   }
 
   getTurmaById(id: number): Observable<Turma> {
-    return this.http.get<Turma>(`${this.API_URL}/${id}`);
+    return this.http.get<Turma>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 
   createTurma(turma: Turma): Observable<Turma> {
-    return this.http.post<Turma>(this.API_URL, turma);
+    return this.http.post<Turma>(this.API_URL, turma, { headers: this.getHeaders() });
   }
 
   updateTurma(id: number, turma: Turma): Observable<Turma> {
-    return this.http.put<Turma>(`${this.API_URL}/${id}`, turma);
+    return this.http.put<Turma>(`${this.API_URL}/${id}`, turma, { headers: this.getHeaders() });
   }
 
   deleteTurma(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.API_URL}/${id}`);
+    return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
 }

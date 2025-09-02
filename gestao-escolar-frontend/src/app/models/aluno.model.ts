@@ -4,6 +4,7 @@ export interface Aluno {
   matricula: string;
   dataNascimento: string;
   email: string;
+  senha: string;
   turma?: Turma;
   turmaId?: number;
 }
@@ -20,5 +21,6 @@ export interface AlunoDTO {
   matricula: string;
   dataNascimento: string;
   email: string;
+  senha: string;
   turmaId: number;
 }

@@ -1,6 +1,6 @@
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, map } from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 import { Usuario, LoginRequest, LoginResponse, TipoUsuario } from '../models/usuario.model';
 
@@ -31,16 +31,40 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<LoginResponse> {
     console.log('🔗 Fazendo requisição para:', `${this.API_URL}/auth/login`);
     
-    return this.http.post<LoginResponse>(`${this.API_URL}/auth/login`, credentials)
+    // O backend retorna apenas o token, então vamos criar um usuário mock
+    return this.http.post<string>(`${this.API_URL}/auth/login`, credentials)
       .pipe(
-        tap(response => {
-          console.log('✅ Resposta do backend:', response);
+        tap(token => {
+          console.log('🎫 Token recebido:', token);
+          
+          // Criar usuário mock baseado no email
+          const mockUser: Usuario = {
+            id: 1,
+            nome: credentials.email.split('@')[0], // Usar parte do email como nome
+            email: credentials.email,
+            tipoUsuario: TipoUsuario.ADMINISTRADOR // Assumir que é admin por enquanto
+          };
           
           if (isPlatformBrowser(this.platformId)) {
-            localStorage.setItem('token', response.token);
-            localStorage.setItem('currentUser', JSON.stringify(response.usuario));
+            localStorage.setItem('token', token);
+            localStorage.setItem('currentUser', JSON.stringify(mockUser));
           }
-          this.currentUserSubject.next(response.usuario);
+          this.currentUserSubject.next(mockUser);
+        }),
+        map(token => {
+          // Retornar objeto LoginResponse compatível
+          const mockUser: Usuario = {
+            id: 1,
+            nome: credentials.email.split('@')[0],
+            email: credentials.email,
+            tipoUsuario: TipoUsuario.ADMINISTRADOR
+          };
+          
+          return {
+            token: token,
+            usuario: mockUser,
+            tipoUsuario: TipoUsuario.ADMINISTRADOR
+          };
         })
       );
   }
