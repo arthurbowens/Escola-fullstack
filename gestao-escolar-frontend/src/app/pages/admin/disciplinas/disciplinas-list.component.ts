@@ -101,10 +101,13 @@ export class DisciplinasListComponent implements OnInit {
     this.searchTerm = '';
   }
 
-  getProfessorNome(professorId: string | undefined): string {
-    if (!professorId) return 'Não atribuído';
-    
-    // Por enquanto retorna o ID, depois pode ser melhorado para buscar o nome
-    return `Professor ${professorId.substring(0, 8)}...`;
+  getProfessorNome(disciplina: Disciplina): string {
+    if (disciplina.professorNome) {
+      return disciplina.professorNome;
+    }
+    if (disciplina.professorId) {
+      return `Professor ${disciplina.professorId.substring(0, 8)}...`;
+    }
+    return 'Não atribuído';
   }
 }

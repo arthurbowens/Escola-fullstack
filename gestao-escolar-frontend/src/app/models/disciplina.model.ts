@@ -2,8 +2,8 @@ export interface Disciplina {
   id?: string;
   nome: string;
   cargaHoraria: number;
-  professor?: Professor;
   professorId?: string;
+  professorNome?: string;
 }
 
 export interface Professor {

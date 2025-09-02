@@ -20,4 +20,5 @@ export interface ProfessorDTO {
   dataNascimento: string;
   formacaoAcademica?: string;
   telefone?: string;
+  disciplinasIds?: string[];
 }

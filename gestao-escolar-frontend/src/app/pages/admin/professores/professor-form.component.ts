@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ProfessorService } from '../../../services/professor.service';
+import { DisciplinaService } from '../../../services/disciplina.service';
 import { Professor, ProfessorDTO } from '../../../models/professor.model';
+import { Disciplina } from '../../../models/disciplina.model';
 
 @Component({
   selector: 'app-professor-form',
@@ -20,13 +22,16 @@ export class ProfessorFormComponent implements OnInit {
     senha: '',
     dataNascimento: '',
     formacaoAcademica: '',
-    telefone: ''
+    telefone: '',
+    disciplinasIds: []
   };
 
   loading = false;
   error = '';
   isEditMode = false;
   professorId: string | null = null;
+  disciplinas: Disciplina[] = [];
+  disciplinasSelecionadas: string[] = [];
 
   formacoes = [
     'Graduação',
@@ -38,6 +43,7 @@ export class ProfessorFormComponent implements OnInit {
 
   constructor(
     private professorService: ProfessorService,
+    private disciplinaService: DisciplinaService,
     private router: Router
   ) {}
 
@@ -45,6 +51,23 @@ export class ProfessorFormComponent implements OnInit {
     console.log('🎓 Componente ProfessorFormComponent inicializado');
     // Por enquanto, apenas para criar novos professores
     this.isEditMode = false;
+    this.loadDisciplinas();
+  }
+
+  loadDisciplinas(): void {
+    this.disciplinaService.getDisciplinas().subscribe({
+      next: (disciplinas) => {
+        this.disciplinas = disciplinas || [];
+        console.log('📚 Disciplinas carregadas:', disciplinas);
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar disciplinas:', error);
+        // Se for erro 404 ou similar, tratar como estado vazio
+        if (error.status === 404 || error.status === 403) {
+          this.disciplinas = [];
+        }
+      }
+    });
   }
 
   onSubmit(): void {
@@ -54,6 +77,9 @@ export class ProfessorFormComponent implements OnInit {
 
     this.loading = true;
     this.error = '';
+
+    // Adicionar disciplinas selecionadas ao professor
+    this.professor.disciplinasIds = this.disciplinasSelecionadas;
 
     this.professorService.createProfessor(this.professor).subscribe({
       next: (professor) => {
@@ -100,8 +126,31 @@ export class ProfessorFormComponent implements OnInit {
       return false;
     }
 
+    // Validar se pelo menos uma disciplina foi selecionada
+    if (this.disciplinasSelecionadas.length === 0) {
+      this.error = 'Selecione pelo menos uma disciplina';
+      return false;
+    }
+
     this.error = '';
     return true;
+  }
+
+  toggleDisciplina(disciplinaId: string): void {
+    const index = this.disciplinasSelecionadas.indexOf(disciplinaId);
+    if (index > -1) {
+      this.disciplinasSelecionadas.splice(index, 1);
+    } else {
+      this.disciplinasSelecionadas.push(disciplinaId);
+    }
+  }
+
+  isDisciplinaSelecionada(disciplinaId: string): boolean {
+    return this.disciplinasSelecionadas.includes(disciplinaId);
+  }
+
+  getDisciplinasSelecionadas(): Disciplina[] {
+    return this.disciplinas.filter(d => this.disciplinasSelecionadas.includes(d.id!));
   }
 
   cancel(): void {
