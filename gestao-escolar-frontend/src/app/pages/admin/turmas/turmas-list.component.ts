@@ -8,11 +8,12 @@ import { DisciplinaService } from '../../../services/disciplina.service';
 import { AlertService } from '../../../services/alert.service';
 import { Turma, Aluno } from '../../../models/aluno.model';
 import { Disciplina } from '../../../models/disciplina.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-turmas-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './turmas-list.component.html',
   styleUrls: ['./turmas-list.component.scss']
 })

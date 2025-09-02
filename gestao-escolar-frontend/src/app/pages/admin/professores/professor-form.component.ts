@@ -6,11 +6,12 @@ import { ProfessorService } from '../../../services/professor.service';
 import { DisciplinaService } from '../../../services/disciplina.service';
 import { Professor, ProfessorDTO } from '../../../models/professor.model';
 import { Disciplina } from '../../../models/disciplina.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-professor-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './professor-form.component.html',
   styleUrls: ['./professor-form.component.scss']
 })

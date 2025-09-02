@@ -3,12 +3,85 @@
 
 .nav-link {
   transition: all 0.2s ease-in-out;
+  position: relative;
 }
 
 .nav-link:hover {
   transform: translateY(-1px);
 }
 
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #6366f1);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover::after {
+  width: 80%;
+}
+
 .nav-menu {
   transition: opacity 0.3s ease-in-out;
+}
+
+// Animações para o menu mobile
+.mobile-menu-enter {
+  animation: slideDown 0.3s ease-out;
+}
+
+.mobile-menu-exit {
+  animation: slideUp 0.3s ease-in;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+// Efeito de glassmorphism para o header
+.glass-effect {
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+// Hover effects para botões
+.btn-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+// Estilo para links ativos
+.router-link-active {
+  background: linear-gradient(135deg, #dbeafe, #e0e7ff) !important;
+  color: #1e40af !important;
+  border-color: #93c5fd !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }

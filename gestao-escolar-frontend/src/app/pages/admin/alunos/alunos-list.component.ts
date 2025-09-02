@@ -6,11 +6,12 @@ import { AlunoService } from '../../../services/aluno.service';
 import { TurmaService } from '../../../services/turma.service';
 import { AlertService } from '../../../services/alert.service';
 import { Aluno, Turma } from '../../../models/aluno.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-alunos-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './alunos-list.component.html',
   styleUrls: ['./alunos-list.component.scss']
 })

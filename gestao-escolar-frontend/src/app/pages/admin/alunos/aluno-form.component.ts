@@ -5,11 +5,12 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { AlunoService } from '../../../services/aluno.service';
 import { TurmaService } from '../../../services/turma.service';
 import { Aluno, AlunoDTO, Turma } from '../../../models/aluno.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-aluno-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './aluno-form.component.html',
   styleUrls: ['./aluno-form.component.scss']
 })

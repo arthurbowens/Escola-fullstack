@@ -5,11 +5,12 @@ import { RouterModule, Router } from '@angular/router';
 import { DisciplinaService } from '../../../services/disciplina.service';
 import { AlertService } from '../../../services/alert.service';
 import { Disciplina } from '../../../models/disciplina.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-disciplinas-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './disciplinas-list.component.html',
   styleUrls: ['./disciplinas-list.component.scss']
 })

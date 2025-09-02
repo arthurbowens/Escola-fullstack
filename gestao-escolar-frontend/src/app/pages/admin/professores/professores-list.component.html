@@ -1,6 +1,11 @@
 <div class="min-h-screen bg-gray-50">
-  <!-- Header -->
-  <div class="bg-white shadow-sm border-b border-gray-200">
+  <!-- Navigation -->
+  <app-admin-nav></app-admin-nav>
+  
+  <!-- Main Content with padding for fixed header -->
+  <div class="pt-16">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center py-6">
         <div>
@@ -10,7 +15,7 @@
         <div class="flex space-x-3">
           <button 
             routerLink="/admin/professores/novo"
-            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center"
           >
             <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -150,7 +155,7 @@
       <div class="mt-6">
         <button 
           routerLink="/admin/professores/novo"
-          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+          class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
         >
           <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -160,4 +165,5 @@
       </div>
     </div>
   </main>
+  </div>
 </div>

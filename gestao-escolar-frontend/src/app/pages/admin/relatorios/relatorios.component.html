@@ -1,0 +1,309 @@
+<div class="min-h-screen bg-gray-50">
+  <!-- Navigation -->
+  <app-admin-nav></app-admin-nav>
+  
+  <!-- Main Content with padding for fixed header -->
+  <div class="pt-16">
+    <!-- Header -->
+    <div class="bg-white shadow-sm border-b border-gray-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center py-6">
+          <div>
+            <h1 class="text-2xl font-bold text-gray-900">Relatórios</h1>
+            <p class="text-sm text-gray-500">Visualize estatísticas e relatórios do sistema</p>
+          </div>
+          <div class="flex space-x-3">
+            <button 
+              (click)="exportarRelatorio('geral')"
+              class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <span>Exportar PDF</span>
+            </button>
+            <button 
+              (click)="loadData()"
+              class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              <span>Atualizar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <!-- Loading State -->
+      <div *ngIf="loading" class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+
+      <!-- Error State -->
+      <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+        <div class="flex">
+          <svg class="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <div class="ml-3">
+            <h3 class="text-sm font-medium text-red-800">Erro ao carregar relatórios</h3>
+            <p class="mt-1 text-sm text-red-700">{{ error }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div *ngIf="!loading && !error">
+        <!-- Cards de Estatísticas Gerais -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <!-- Total Alunos -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 bg-blue-500 rounded-md flex items-center justify-center">
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Alunos</dt>
+                    <dd class="text-lg font-medium text-gray-900">{{ totalAlunos }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Professores -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 bg-purple-500 rounded-md flex items-center justify-center">
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Professores</dt>
+                    <dd class="text-lg font-medium text-gray-900">{{ totalProfessores }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Turmas -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 bg-green-500 rounded-md flex items-center justify-center">
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Turmas</dt>
+                    <dd class="text-lg font-medium text-gray-900">{{ totalTurmas }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Disciplinas -->
+          <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+              <div class="flex items-center">
+                <div class="flex-shrink-0">
+                  <div class="h-8 w-8 bg-orange-500 rounded-md flex items-center justify-center">
+                    <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                  </div>
+                </div>
+                <div class="ml-5 w-0 flex-1">
+                  <dl>
+                    <dt class="text-sm font-medium text-gray-500 truncate">Total de Disciplinas</dt>
+                    <dd class="text-lg font-medium text-gray-900">{{ totalDisciplinas }}</dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Relatórios Detalhados -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Alunos por Turma -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Alunos por Turma</h3>
+              <div class="space-y-3">
+                <div *ngFor="let item of alunosPorTurma | keyvalue" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
+                  <span class="text-sm font-bold text-blue-600">{{ item.value }} alunos</span>
+                </div>
+                <div *ngIf="Object.keys(alunosPorTurma).length === 0" class="text-center py-4 text-gray-500">
+                  Nenhum dado disponível
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Disciplinas por Professor -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Disciplinas por Professor</h3>
+              <div class="space-y-3">
+                <div *ngFor="let item of disciplinasPorProfessor | keyvalue" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
+                  <span class="text-sm font-bold text-purple-600">{{ item.value }} disciplinas</span>
+                </div>
+                <div *ngIf="Object.keys(disciplinasPorProfessor).length === 0" class="text-center py-4 text-gray-500">
+                  Nenhum dado disponível
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Turmas por Série -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Turmas por Série</h3>
+              <div class="space-y-3">
+                <div *ngFor="let item of turmasPorSerie | keyvalue" class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
+                  <span class="text-sm font-bold text-green-600">{{ item.value }} turmas</span>
+                </div>
+                <div *ngIf="Object.keys(turmasPorSerie).length === 0" class="text-center py-4 text-gray-500">
+                  Nenhum dado disponível
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Resumo Geral -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Resumo Geral</h3>
+              <div class="space-y-4">
+                <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">Média de Alunos por Turma</span>
+                  <span class="text-sm font-bold text-blue-600">
+                    {{ totalTurmas > 0 ? (totalAlunos / totalTurmas | number:'1.1-1') : '0' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">Média de Disciplinas por Professor</span>
+                  <span class="text-sm font-bold text-purple-600">
+                    {{ totalProfessores > 0 ? (totalDisciplinas / totalProfessores | number:'1.1-1') : '0' }}
+                  </span>
+                </div>
+                <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                  <span class="text-sm font-medium text-gray-700">Taxa de Ocupação</span>
+                  <span class="text-sm font-bold text-green-600">
+                    {{ totalTurmas > 0 ? ((totalAlunos / (totalTurmas * 30)) * 100 | number:'1.1-1') : '0' }}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtros e Listas Detalhadas -->
+        <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Filtros -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Filtros</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Turma</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="filtroTurma"
+                    placeholder="Digite o nome da turma..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Série</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="filtroSerie"
+                    placeholder="Digite a série..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Filtrar por Disciplina</label>
+                  <input 
+                    type="text" 
+                    [(ngModel)]="filtroDisciplina"
+                    placeholder="Digite o nome da disciplina..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <button 
+                  (click)="limparFiltros()"
+                  class="w-full bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors"
+                >
+                  Limpar Filtros
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de Alunos Filtrados -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Alunos ({{ getAlunosFiltrados().length }})
+              </h3>
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <div *ngFor="let aluno of getAlunosFiltrados()" class="p-2 bg-gray-50 rounded text-sm">
+                  <div class="font-medium text-gray-900">{{ aluno.nome }}</div>
+                  <div class="text-gray-500">{{ getTurmaNome(aluno.turmaId) }}</div>
+                </div>
+                <div *ngIf="getAlunosFiltrados().length === 0" class="text-center py-4 text-gray-500">
+                  Nenhum aluno encontrado
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lista de Turmas Filtradas -->
+          <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+              <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                Turmas ({{ getTurmasFiltradas().length }})
+              </h3>
+              <div class="space-y-2 max-h-64 overflow-y-auto">
+                <div *ngFor="let turma of getTurmasFiltradas()" class="p-2 bg-gray-50 rounded text-sm">
+                  <div class="font-medium text-gray-900">{{ turma.nome }}</div>
+                  <div class="text-gray-500">Série: {{ turma.serie || 'N/A' }}</div>
+                </div>
+                <div *ngIf="getTurmasFiltradas().length === 0" class="text-center py-4 text-gray-500">
+                  Nenhuma turma encontrada
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

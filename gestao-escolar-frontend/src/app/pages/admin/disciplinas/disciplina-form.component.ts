@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { DisciplinaService } from '../../../services/disciplina.service';
 import { Disciplina, DisciplinaDTO } from '../../../models/disciplina.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-disciplina-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './disciplina-form.component.html',
   styleUrls: ['./disciplina-form.component.scss']
 })

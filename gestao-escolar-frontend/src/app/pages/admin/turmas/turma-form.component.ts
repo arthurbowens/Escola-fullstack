@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TurmaService } from '../../../services/turma.service';
 import { Turma } from '../../../models/aluno.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-turma-form',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './turma-form.component.html',
   styleUrls: ['./turma-form.component.scss']
 })

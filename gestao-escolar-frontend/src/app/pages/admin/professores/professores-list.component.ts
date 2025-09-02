@@ -5,11 +5,12 @@ import { RouterModule, Router } from '@angular/router';
 import { ProfessorService } from '../../../services/professor.service';
 import { AlertService } from '../../../services/alert.service';
 import { Professor } from '../../../models/professor.model';
+import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
   selector: 'app-professores-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, AdminNavComponent],
   templateUrl: './professores-list.component.html',
   styleUrls: ['./professores-list.component.scss']
 })

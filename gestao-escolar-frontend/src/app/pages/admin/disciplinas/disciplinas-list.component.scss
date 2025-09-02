@@ -1,4 +1,15 @@
 // Estilos específicos para a lista de disciplinas
+
+// Garantir que o header fixo funcione corretamente
+.pt-16 {
+  padding-top: 4rem !important;
+}
+
+// Garantir que o conteúdo não seja sobreposto pelo header fixo
+.min-h-screen {
+  position: relative;
+  z-index: 1;
+}
 .disciplina-card {
   transition: all 0.2s ease-in-out;
   
@@ -37,6 +48,21 @@
 
 .disciplina-card {
   animation: fadeInUp 0.5s ease-out;
+}
+
+// Forçar cor azul nos botões de nova disciplina
+.nova-disciplina-btn {
+  background-color: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
+.nova-disciplina-btn:hover {
+  background-color: #1d4ed8 !important;
+  border-color: #1d4ed8 !important;
+}
+
+.nova-disciplina-btn:focus {
+  ring-color: #3b82f6 !important;
 }
 
 // Responsividade

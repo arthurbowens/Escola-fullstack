@@ -1,35 +1,87 @@
-<nav class="bg-gray-800">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-white shadow-lg border-b border-gray-200">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex items-center justify-between h-16">
+      <!-- Logo e Título -->
       <div class="flex items-center">
         <div class="flex-shrink-0">
-          <div class="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
-            <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          <div class="h-10 w-10 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+            <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
             </svg>
           </div>
         </div>
         <div class="ml-4">
-          <h1 class="text-xl font-semibold text-white">Gestão Escolar</h1>
+          <h1 class="text-xl font-bold text-gray-900">Gestão Escolar</h1>
+          <p class="text-xs text-gray-500">Sistema Administrativo</p>
         </div>
       </div>
       
+      <!-- Menu de Navegação -->
       <div class="hidden md:block">
-        <div class="ml-10 flex items-baseline space-x-4">
+        <div class="ml-10 flex items-center space-x-1">
           <a 
             *ngFor="let item of menuItems" 
             [routerLink]="item.route"
-            routerLinkActive="bg-gray-900 text-white"
-            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            routerLinkActive="bg-blue-50 text-blue-700 border-blue-200"
+            class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border border-transparent flex items-center space-x-2"
           >
-            {{ item.label }}
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getIconPath(item.icon)"></path>
+            </svg>
+            <span>{{ item.label }}</span>
           </a>
         </div>
       </div>
       
-      <div class="flex items-center">
-        <button class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors text-sm">
-          Sair
+      <!-- Menu Mobile -->
+      <div class="md:hidden">
+        <button 
+          (click)="toggleMobileMenu()"
+          class="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+        >
+          <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+          </svg>
+        </button>
+      </div>
+      
+      <!-- Botão Sair -->
+      <div class="hidden md:flex items-center">
+        <button 
+          (click)="logout()"
+          class="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium border border-red-200 flex items-center space-x-2"
+        >
+          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span>Sair</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Menu Mobile Expandido -->
+    <div *ngIf="isMobileMenuOpen" class="md:hidden border-t border-gray-200 bg-white">
+      <div class="px-2 pt-2 pb-3 space-y-1">
+        <a 
+          *ngFor="let item of menuItems" 
+          [routerLink]="item.route"
+          routerLinkActive="bg-blue-50 text-blue-700"
+          (click)="closeMobileMenu()"
+          class="text-gray-600 hover:bg-gray-50 hover:text-gray-900 block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center space-x-3"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getIconPath(item.icon)"></path>
+          </svg>
+          <span>{{ item.label }}</span>
+        </a>
+        <button 
+          (click)="logout()"
+          class="w-full text-left text-red-600 hover:bg-red-50 block px-3 py-2 rounded-md text-base font-medium transition-colors flex items-center space-x-3"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+          </svg>
+          <span>Sair</span>
         </button>
       </div>
     </div>

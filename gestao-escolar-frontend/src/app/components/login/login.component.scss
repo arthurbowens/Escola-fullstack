@@ -1,18 +1,159 @@
-// Estilos customizados para o componente de login
-// A maioria dos estilos está sendo feita com Tailwind CSS
+// Estilos customizados para o componente de login profissional
 
-.form-input:focus {
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+// Animação de entrada para o formulário
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.btn-primary {
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// Aplicar animações
+.min-h-screen {
+  animation: fadeIn 0.8s ease-out;
+}
+
+.max-w-md {
+  animation: slideInUp 0.8s ease-out 0.2s both;
+}
+
+// Efeitos de hover para inputs
+input[type="email"], input[type="password"] {
+  transition: all 0.3s ease;
+  
+  &:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+// Efeitos para o botão
+button[type="submit"] {
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+  }
+  
+  &:hover::before {
+    left: 100%;
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// Efeitos para o logo
+.mx-auto.h-20 {
+  animation: float 3s ease-in-out infinite;
+}
+
+// Efeitos de glassmorphism
+.bg-white\/10 {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+// Efeitos para elementos flutuantes
+.animate-pulse {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Efeitos de gradiente animado
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.bg-gradient-to-br {
+  background-size: 200% 200%;
+  animation: gradientShift 8s ease infinite;
+}
+
+// Efeitos de texto gradiente
+.bg-clip-text {
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+// Responsividade melhorada
+@media (max-width: 640px) {
+  .min-h-screen {
+    padding: 1rem;
+  }
+  
+  .max-w-md {
+    margin: 0 1rem;
+  }
+  
+  .bg-white\/10 {
+    padding: 1.5rem;
+  }
+}
+
+// Efeitos de loading
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Efeitos de foco acessível
+*:focus {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+// Efeitos de transição suave
+* {
   transition: all 0.2s ease-in-out;
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-}
-
-.btn-primary:active {
-  transform: translateY(0);
 }
