@@ -55,4 +55,9 @@ export class ProfessorService {
   getDisciplinasLecionadas(id: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${id}/disciplinas`, { headers: this.getHeaders() });
   }
+
+  getProfessorLogado(): Observable<Professor> {
+    console.log('👨‍🏫 Buscando dados do professor logado');
+    return this.http.get<Professor>(`${this.apiUrl}/me`, { headers: this.getHeaders() });
+  }
 }

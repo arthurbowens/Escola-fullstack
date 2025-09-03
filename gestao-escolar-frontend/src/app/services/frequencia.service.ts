@@ -12,6 +12,20 @@ export interface Frequencia {
     id: string;
     nome: string;
   };
+  aluno?: {
+    id: string;
+    nome: string;
+  };
+}
+
+export interface FrequenciaDTO {
+  id?: string;
+  alunoId?: string;
+  disciplinaId?: string;
+  disciplinaNome?: string;
+  dataAula: string;
+  presente: boolean;
+  observacao?: string;
 }
 
 export interface FrequenciaResumo {
@@ -41,16 +55,16 @@ export class FrequenciaService {
     });
   }
 
-  getFrequenciasPorAluno(alunoId: string): Observable<Frequencia[]> {
+  getFrequenciasPorAluno(alunoId: string): Observable<FrequenciaDTO[]> {
     console.log('📅 Buscando frequências do aluno:', alunoId);
-    return this.http.get<Frequencia[]>(`${this.API_URL}/frequencias/aluno/${alunoId}`, {
+    return this.http.get<FrequenciaDTO[]>(`${this.API_URL}/frequencias/aluno/${alunoId}`, {
       headers: this.getHeaders()
     });
   }
 
-  getFrequenciasPorAlunoEDisciplina(alunoId: string, disciplinaId: string): Observable<Frequencia[]> {
+  getFrequenciasPorAlunoEDisciplina(alunoId: string, disciplinaId: string): Observable<FrequenciaDTO[]> {
     console.log('📅 Buscando frequências do aluno por disciplina:', alunoId, disciplinaId);
-    return this.http.get<Frequencia[]>(`${this.API_URL}/frequencias/aluno/${alunoId}/disciplina/${disciplinaId}`, {
+    return this.http.get<FrequenciaDTO[]>(`${this.API_URL}/frequencias/aluno/${alunoId}/disciplina/${disciplinaId}`, {
       headers: this.getHeaders()
     });
   }
@@ -76,9 +90,19 @@ export class FrequenciaService {
     });
   }
 
-  createFrequencia(frequencia: Frequencia): Observable<Frequencia> {
+  createFrequencia(frequencia: Frequencia): Observable<FrequenciaDTO> {
     console.log('📅 Criando frequência:', frequencia);
-    return this.http.post<Frequencia>(`${this.API_URL}/frequencias`, frequencia, {
+    
+    // Converter Frequencia para FrequenciaDTO
+    const frequenciaDTO: FrequenciaDTO = {
+      alunoId: frequencia.aluno?.id,
+      disciplinaId: frequencia.disciplina?.id,
+      dataAula: frequencia.dataAula,
+      presente: frequencia.presente,
+      observacao: frequencia.observacao
+    };
+    
+    return this.http.post<FrequenciaDTO>(`${this.API_URL}/frequencias`, frequenciaDTO, {
       headers: this.getHeaders()
     });
   }

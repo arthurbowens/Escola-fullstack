@@ -1,6 +1,7 @@
 package com.arthur.gestaoEscolar.controller;
 
 import com.arthur.gestaoEscolar.model.entity.Frequencia;
+import com.arthur.gestaoEscolar.model.dto.FrequenciaDTO;
 import com.arthur.gestaoEscolar.service.FrequenciaService;
 import com.arthur.gestaoEscolar.exception.GestaoEscolarException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/frequencias")
@@ -44,11 +46,14 @@ public class FrequenciaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR') or #alunoId == authentication.principal.id")
-    public ResponseEntity<List<Frequencia>> buscarPorAluno(@PathVariable String alunoId) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR', 'ALUNO')")
+    public ResponseEntity<List<FrequenciaDTO>> buscarPorAluno(@PathVariable String alunoId) {
         try {
             List<Frequencia> frequencias = frequenciaService.buscarPorAluno(alunoId);
-            return ResponseEntity.ok(frequencias);
+            List<FrequenciaDTO> frequenciasDTO = frequencias.stream()
+                    .map(FrequenciaDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(frequenciasDTO);
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -67,10 +72,13 @@ public class FrequenciaController {
 
     @GetMapping("/aluno/{alunoId}/disciplina/{disciplinaId}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR') or #alunoId == authentication.principal.id")
-    public ResponseEntity<List<Frequencia>> buscarPorAlunoEDisciplina(@PathVariable String alunoId, @PathVariable String disciplinaId) {
+    public ResponseEntity<List<FrequenciaDTO>> buscarPorAlunoEDisciplina(@PathVariable String alunoId, @PathVariable String disciplinaId) {
         try {
             List<Frequencia> frequencias = frequenciaService.buscarPorAlunoEDisciplina(alunoId, disciplinaId);
-            return ResponseEntity.ok(frequencias);
+            List<FrequenciaDTO> frequenciasDTO = frequencias.stream()
+                    .map(FrequenciaDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(frequenciasDTO);
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -138,10 +146,10 @@ public class FrequenciaController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR')")
-    public ResponseEntity<Frequencia> salvar(@RequestBody Frequencia frequencia) {
+    public ResponseEntity<FrequenciaDTO> salvar(@RequestBody FrequenciaDTO frequenciaDTO) {
         try {
-            Frequencia frequenciaSalva = frequenciaService.salvar(frequencia);
-            return ResponseEntity.status(HttpStatus.CREATED).body(frequenciaSalva);
+            Frequencia frequenciaSalva = frequenciaService.salvarComDTO(frequenciaDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new FrequenciaDTO(frequenciaSalva));
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

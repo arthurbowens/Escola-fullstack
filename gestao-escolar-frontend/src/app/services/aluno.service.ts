@@ -50,4 +50,9 @@ export class AlunoService {
   deleteAluno(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
+
+  getAlunosPorTurma(turmaId: string): Observable<Aluno[]> {
+    console.log('👨‍🎓 Buscando alunos da turma:', turmaId);
+    return this.http.get<Aluno[]>(`${this.API_URL}/turma/${turmaId}`, { headers: this.getHeaders() });
+  }
 }

@@ -3,6 +3,7 @@ package com.arthur.gestaoEscolar.service;
 import com.arthur.gestaoEscolar.model.entity.Frequencia;
 import com.arthur.gestaoEscolar.model.entity.Aluno;
 import com.arthur.gestaoEscolar.model.entity.Disciplina;
+import com.arthur.gestaoEscolar.model.dto.FrequenciaDTO;
 import com.arthur.gestaoEscolar.model.repository.FrequenciaRepository;
 import com.arthur.gestaoEscolar.model.repository.AlunoRepository;
 import com.arthur.gestaoEscolar.model.repository.DisciplinaRepository;
@@ -41,9 +42,7 @@ public class FrequenciaService {
 
     public List<Frequencia> buscarPorAluno(String alunoId) throws GestaoEscolarException {
         List<Frequencia> frequencias = this.frequenciaRepository.findByAlunoId(alunoId);
-        if (frequencias.isEmpty()) {
-            throw new GestaoEscolarException("Nenhuma frequência encontrada para este aluno");
-        }
+        // Retornar lista vazia ao invés de lançar exceção
         return frequencias;
     }
 
@@ -96,6 +95,39 @@ public class FrequenciaService {
         this.validarFrequencia(frequencia);
         this.verificarAlunoExiste(frequencia.getAluno().getId());
         this.verificarDisciplinaExiste(frequencia.getDisciplina().getId());
+        
+        return frequenciaRepository.save(frequencia);
+    }
+
+    public Frequencia salvarComDTO(FrequenciaDTO frequenciaDTO) throws GestaoEscolarException {
+        // Validar se os IDs foram fornecidos
+        if (frequenciaDTO.getAlunoId() == null || frequenciaDTO.getAlunoId().trim().isEmpty()) {
+            throw new GestaoEscolarException("ID do aluno é obrigatório");
+        }
+        if (frequenciaDTO.getDisciplinaId() == null || frequenciaDTO.getDisciplinaId().trim().isEmpty()) {
+            throw new GestaoEscolarException("ID da disciplina é obrigatório");
+        }
+
+        // Verificar se aluno e disciplina existem
+        this.verificarAlunoExiste(frequenciaDTO.getAlunoId());
+        this.verificarDisciplinaExiste(frequenciaDTO.getDisciplinaId());
+
+        // Buscar as entidades
+        Aluno aluno = this.alunoRepository.findById(frequenciaDTO.getAlunoId())
+                .orElseThrow(() -> new GestaoEscolarException("Aluno não encontrado"));
+        Disciplina disciplina = this.disciplinaRepository.findById(frequenciaDTO.getDisciplinaId())
+                .orElseThrow(() -> new GestaoEscolarException("Disciplina não encontrada"));
+
+        // Criar a entidade Frequencia
+        Frequencia frequencia = new Frequencia();
+        frequencia.setAluno(aluno);
+        frequencia.setDisciplina(disciplina);
+        frequencia.setDataAula(frequenciaDTO.getDataAula());
+        frequencia.setPresente(frequenciaDTO.getPresente());
+        frequencia.setObservacao(frequenciaDTO.getObservacao());
+
+        // Validar a frequencia
+        this.validarFrequencia(frequencia);
         
         return frequenciaRepository.save(frequencia);
     }

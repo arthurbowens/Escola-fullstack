@@ -7,6 +7,8 @@ import com.arthur.gestaoEscolar.model.repository.ProfessorRepository;
 import com.arthur.gestaoEscolar.model.repository.DisciplinaRepository;
 import com.arthur.gestaoEscolar.exception.GestaoEscolarException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,17 @@ public class ProfessorService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    public Professor buscarProfessorLogado() throws GestaoEscolarException {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new GestaoEscolarException("Usuário não autenticado");
+        }
+        
+        String email = authentication.getName();
+        return this.professorRepository.findByEmail(email)
+                .orElseThrow(() -> new GestaoEscolarException("Professor não encontrado"));
+    }
 
     public Professor buscarPorId(String id) throws GestaoEscolarException {
         return this.professorRepository.findById(id)

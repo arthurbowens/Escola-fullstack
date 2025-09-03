@@ -58,4 +58,9 @@ export class TurmaService {
   removerDisciplina(turmaId: string, disciplinaId: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${turmaId}/disciplinas/${disciplinaId}`, { headers: this.getHeaders() });
   }
+
+  getTurmasPorDisciplina(disciplinaId: string): Observable<Turma[]> {
+    console.log('🏫 Buscando turmas da disciplina:', disciplinaId);
+    return this.http.get<Turma[]>(`${this.API_URL}/disciplina/${disciplinaId}`, { headers: this.getHeaders() });
+  }
 }

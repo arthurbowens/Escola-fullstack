@@ -8,8 +8,9 @@ import { ProfessorService } from '../../services/professor.service';
 import { DisciplinaService } from '../../services/disciplina.service';
 import { TurmaService } from '../../services/turma.service';
 import { AlunoService } from '../../services/aluno.service';
-import { NotaService } from '../../services/nota.service';
-import { FrequenciaService } from '../../services/frequencia.service';
+import { NotaService, NotaDTO } from '../../services/nota.service';
+import { FrequenciaService, FrequenciaDTO } from '../../services/frequencia.service';
+import { AlertService } from '../../services/alert.service';
 import { Usuario, TipoUsuario } from '../../models/usuario.model';
 import { Professor } from '../../models/professor.model';
 import { Disciplina } from '../../models/disciplina.model';
@@ -37,8 +38,8 @@ export class ProfessorDashboardComponent implements OnInit {
   alunoSelecionado: Aluno | null = null;
   
   // Dados para lançamento
-  notas: Nota[] = [];
-  frequencias: Frequencia[] = [];
+  notas: NotaDTO[] = [];
+  frequencias: FrequenciaDTO[] = [];
   
   // Estados
   loading = false;
@@ -68,6 +69,7 @@ export class ProfessorDashboardComponent implements OnInit {
     private alunoService: AlunoService,
     private notaService: NotaService,
     private frequenciaService: FrequenciaService,
+    private alertService: AlertService,
     private router: Router
   ) {}
 
@@ -79,40 +81,46 @@ export class ProfessorDashboardComponent implements OnInit {
     this.loading = true;
     this.error = '';
 
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || !currentUser.id) {
-      this.error = 'Usuário não encontrado';
-      this.loading = false;
-      return;
-    }
+    console.log('👨‍🏫 Carregando dados do professor logado');
 
-    console.log('👨‍🏫 Carregando dados do professor:', currentUser.id);
-
-    // Por enquanto, vamos simular dados do professor
-    // Em uma implementação real, você buscaria os dados do professor pelo email
-    this.professor = {
-      id: '1',
-      nome: 'Prof. João Silva',
-      email: currentUser.email,
-      cpf: '123.456.789-00',
-      formacaoAcademica: 'Licenciatura em Matemática',
-      telefone: '(11) 99999-9999',
-      disciplinas: [
-        {
-          id: '1',
-          nome: 'Matemática',
-          cargaHoraria: 80
-        },
-        {
-          id: '2',
-          nome: 'Física',
-          cargaHoraria: 60
+    this.professorService.getProfessorLogado().subscribe({
+      next: (professor) => {
+        console.log('✅ Professor carregado:', professor);
+        this.professor = professor;
+        
+        // Carregar disciplinas do professor
+        if (professor.disciplinas && professor.disciplinas.length > 0) {
+          this.disciplinas = professor.disciplinas;
+        } else if (professor.disciplinasIds && professor.disciplinasIds.length > 0) {
+          // Se só temos IDs, carregar as disciplinas completas
+          this.loadDisciplinasCompletas(professor.disciplinasIds);
+        } else {
+          this.disciplinas = [];
         }
-      ]
-    };
+        
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('❌ Erro ao carregar professor:', err);
+        this.error = 'Erro ao carregar dados do professor';
+        this.loading = false;
+        this.alertService.error('Erro', 'Não foi possível carregar os dados do professor. Verifique sua conexão e tente novamente.');
+      }
+    });
+  }
 
-    this.disciplinas = this.professor.disciplinas || [];
-    this.loading = false;
+  private loadDisciplinasCompletas(disciplinasIds: string[]): void {
+    // Carregar disciplinas completas pelos IDs
+    const requests = disciplinasIds.map(id => 
+      this.disciplinaService.getDisciplinaById(id)
+    );
+
+    Promise.all(requests.map(req => req.toPromise())).then((disciplinas) => {
+      this.disciplinas = disciplinas.filter((d): d is Disciplina => d != null);
+    }).catch((error) => {
+      console.error('❌ Erro ao carregar disciplinas:', error);
+      this.disciplinas = [];
+    });
   }
 
   onDisciplinaChange(): void {
@@ -142,49 +150,47 @@ export class ProfessorDashboardComponent implements OnInit {
   }
 
   loadTurmasDisciplina(): void {
-    // Por enquanto, vamos simular turmas
-    // Em uma implementação real, você buscaria as turmas da disciplina
-    this.turmas = [
-      {
-        id: '1',
-        nome: '3º Ano A',
-        serie: '3',
-        anoLetivo: 2025,
-        ano: '2025'
+    if (!this.disciplinaSelecionada?.id) {
+      this.turmas = [];
+      return;
+    }
+
+    console.log('🏫 Carregando turmas da disciplina:', this.disciplinaSelecionada.id);
+
+    this.turmaService.getTurmasPorDisciplina(this.disciplinaSelecionada.id).subscribe({
+      next: (turmas) => {
+        console.log('✅ Turmas carregadas:', turmas);
+        this.turmas = turmas;
       },
-      {
-        id: '2',
-        nome: '3º Ano B',
-        serie: '3',
-        anoLetivo: 2025,
-        ano: '2025'
+      error: (err) => {
+        console.error('❌ Erro ao carregar turmas:', err);
+        this.turmas = [];
+        this.error = 'Erro ao carregar turmas da disciplina';
+        this.alertService.error('Erro', 'Não foi possível carregar as turmas desta disciplina.');
       }
-    ];
+    });
   }
 
   loadAlunosTurma(): void {
-    // Por enquanto, vamos simular alunos
-    // Em uma implementação real, você buscaria os alunos da turma
-    this.alunos = [
-      {
-        id: '1',
-        nome: 'Gabriela Silva',
-        email: 'gabi@gmail.com',
-        matricula: '2025001',
-        dataNascimento: '2005-03-15',
-        senha: '123456',
-        turma: this.turmaSelecionada || undefined
+    if (!this.turmaSelecionada?.id) {
+      this.alunos = [];
+      return;
+    }
+
+    console.log('👨‍🎓 Carregando alunos da turma:', this.turmaSelecionada.id);
+
+    this.alunoService.getAlunosPorTurma(this.turmaSelecionada.id).subscribe({
+      next: (alunos) => {
+        console.log('✅ Alunos carregados:', alunos);
+        this.alunos = alunos;
       },
-      {
-        id: '2',
-        nome: 'Pedro Almeida',
-        email: 'pedro.almeida@escola.com',
-        matricula: '2025002',
-        dataNascimento: '2005-07-20',
-        senha: '123456',
-        turma: this.turmaSelecionada || undefined
+      error: (err) => {
+        console.error('❌ Erro ao carregar alunos:', err);
+        this.alunos = [];
+        this.error = 'Erro ao carregar alunos da turma';
+        this.alertService.error('Erro', 'Não foi possível carregar os alunos desta turma.');
       }
-    ];
+    });
   }
 
   loadNotasAluno(): void {
@@ -225,12 +231,17 @@ export class ProfessorDashboardComponent implements OnInit {
 
   lancarNota(): void {
     if (!this.alunoSelecionado || !this.disciplinaSelecionada) {
-      this.error = 'Selecione um aluno e uma disciplina';
+      this.alertService.error('Erro', 'Selecione um aluno e uma disciplina antes de lançar a nota.');
       return;
     }
 
     if (this.novaNota.valor < 0 || this.novaNota.valor > 10) {
-      this.error = 'Nota deve estar entre 0 e 10';
+      this.alertService.error('Erro', 'A nota deve estar entre 0 e 10.');
+      return;
+    }
+
+    if (!this.novaNota.dataAvaliacao) {
+      this.alertService.error('Erro', 'A data da avaliação é obrigatória.');
       return;
     }
 
@@ -245,6 +256,10 @@ export class ProfessorDashboardComponent implements OnInit {
       disciplina: this.disciplinaSelecionada ? {
         id: this.disciplinaSelecionada.id!,
         nome: this.disciplinaSelecionada.nome
+      } : undefined,
+      aluno: this.alunoSelecionado ? {
+        id: this.alunoSelecionado.id!,
+        nome: this.alunoSelecionado.nome
       } : undefined
     };
 
@@ -254,18 +269,25 @@ export class ProfessorDashboardComponent implements OnInit {
         this.loadNotasAluno();
         this.resetFormNota();
         this.loading = false;
+        this.alertService.success('Sucesso!', 'Nota lançada com sucesso.');
       },
       error: (err) => {
         console.error('❌ Erro ao lançar nota:', err);
         this.error = 'Erro ao lançar nota';
         this.loading = false;
+        this.alertService.error('Erro', 'Não foi possível lançar a nota. Verifique os dados e tente novamente.');
       }
     });
   }
 
   marcarFrequencia(): void {
     if (!this.alunoSelecionado || !this.disciplinaSelecionada) {
-      this.error = 'Selecione um aluno e uma disciplina';
+      this.alertService.error('Erro', 'Selecione um aluno e uma disciplina antes de marcar a frequência.');
+      return;
+    }
+
+    if (!this.novaFrequencia.dataAula) {
+      this.alertService.error('Erro', 'A data da aula é obrigatória.');
       return;
     }
 
@@ -279,6 +301,10 @@ export class ProfessorDashboardComponent implements OnInit {
       disciplina: this.disciplinaSelecionada ? {
         id: this.disciplinaSelecionada.id!,
         nome: this.disciplinaSelecionada.nome
+      } : undefined,
+      aluno: this.alunoSelecionado ? {
+        id: this.alunoSelecionado.id!,
+        nome: this.alunoSelecionado.nome
       } : undefined
     };
 
@@ -288,11 +314,13 @@ export class ProfessorDashboardComponent implements OnInit {
         this.loadFrequenciasAluno();
         this.resetFormFrequencia();
         this.loading = false;
+        this.alertService.success('Sucesso!', 'Frequência marcada com sucesso.');
       },
       error: (err) => {
         console.error('❌ Erro ao marcar frequência:', err);
         this.error = 'Erro ao marcar frequência';
         this.loading = false;
+        this.alertService.error('Erro', 'Não foi possível marcar a frequência. Verifique os dados e tente novamente.');
       }
     });
   }
@@ -325,9 +353,12 @@ export class ProfessorDashboardComponent implements OnInit {
   onPasswordChanged(success: boolean): void {
     this.showChangePasswordModal = false;
     if (success) {
-      // Opcional: mostrar mensagem de sucesso
-      console.log('Senha alterada com sucesso!');
+      this.alertService.success('Sucesso!', 'Senha alterada com sucesso.');
     }
+  }
+
+  clearError(): void {
+    this.error = '';
   }
 
   logout(): void {

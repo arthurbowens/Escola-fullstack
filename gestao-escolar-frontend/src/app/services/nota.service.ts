@@ -16,6 +16,21 @@ export interface Nota {
       nome: string;
     };
   };
+  aluno?: {
+    id: string;
+    nome: string;
+  };
+}
+
+export interface NotaDTO {
+  id?: string;
+  alunoId?: string;
+  disciplinaId?: string;
+  disciplinaNome?: string;
+  valor: number;
+  tipoAvaliacao: string;
+  dataAvaliacao: string;
+  observacao?: string;
 }
 
 @Injectable({
@@ -37,16 +52,16 @@ export class NotaService {
     });
   }
 
-  getNotasPorAluno(alunoId: string): Observable<Nota[]> {
+  getNotasPorAluno(alunoId: string): Observable<NotaDTO[]> {
     console.log('📊 Buscando notas do aluno:', alunoId);
-    return this.http.get<Nota[]>(`${this.API_URL}/notas/aluno/${alunoId}`, {
+    return this.http.get<NotaDTO[]>(`${this.API_URL}/notas/aluno/${alunoId}`, {
       headers: this.getHeaders()
     });
   }
 
-  getNotasPorAlunoEDisciplina(alunoId: string, disciplinaId: string): Observable<Nota[]> {
+  getNotasPorAlunoEDisciplina(alunoId: string, disciplinaId: string): Observable<NotaDTO[]> {
     console.log('📊 Buscando notas do aluno por disciplina:', alunoId, disciplinaId);
-    return this.http.get<Nota[]>(`${this.API_URL}/notas/aluno/${alunoId}/disciplina/${disciplinaId}`, {
+    return this.http.get<NotaDTO[]>(`${this.API_URL}/notas/aluno/${alunoId}/disciplina/${disciplinaId}`, {
       headers: this.getHeaders()
     });
   }
@@ -58,9 +73,20 @@ export class NotaService {
     });
   }
 
-  createNota(nota: Nota): Observable<Nota> {
+  createNota(nota: Nota): Observable<NotaDTO> {
     console.log('📊 Criando nota:', nota);
-    return this.http.post<Nota>(`${this.API_URL}/notas`, nota, {
+    
+    // Converter Nota para NotaDTO
+    const notaDTO: NotaDTO = {
+      alunoId: nota.aluno?.id,
+      disciplinaId: nota.disciplina?.id,
+      valor: nota.valor,
+      tipoAvaliacao: nota.tipoAvaliacao,
+      dataAvaliacao: nota.dataAvaliacao,
+      observacao: nota.observacao
+    };
+    
+    return this.http.post<NotaDTO>(`${this.API_URL}/notas`, notaDTO, {
       headers: this.getHeaders()
     });
   }

@@ -4,6 +4,7 @@ import com.arthur.gestaoEscolar.model.entity.Nota;
 import com.arthur.gestaoEscolar.model.entity.Aluno;
 import com.arthur.gestaoEscolar.model.entity.Disciplina;
 import com.arthur.gestaoEscolar.model.entity.TipoAvaliacao;
+import com.arthur.gestaoEscolar.model.dto.NotaDTO;
 import com.arthur.gestaoEscolar.model.repository.NotaRepository;
 import com.arthur.gestaoEscolar.model.repository.AlunoRepository;
 import com.arthur.gestaoEscolar.model.repository.DisciplinaRepository;
@@ -42,9 +43,7 @@ public class NotaService {
 
     public List<Nota> buscarPorAluno(String alunoId) throws GestaoEscolarException {
         List<Nota> notas = this.notaRepository.findByAlunoId(alunoId);
-        if (notas.isEmpty()) {
-            throw new GestaoEscolarException("Nenhuma nota encontrada para este aluno");
-        }
+        // Retornar lista vazia ao invés de lançar exceção
         return notas;
     }
 
@@ -89,6 +88,40 @@ public class NotaService {
         this.validarNota(nota);
         this.verificarAlunoExiste(nota.getAluno().getId());
         this.verificarDisciplinaExiste(nota.getDisciplina().getId());
+        
+        return notaRepository.save(nota);
+    }
+
+    public Nota salvarComDTO(NotaDTO notaDTO) throws GestaoEscolarException {
+        // Validar se os IDs foram fornecidos
+        if (notaDTO.getAlunoId() == null || notaDTO.getAlunoId().trim().isEmpty()) {
+            throw new GestaoEscolarException("ID do aluno é obrigatório");
+        }
+        if (notaDTO.getDisciplinaId() == null || notaDTO.getDisciplinaId().trim().isEmpty()) {
+            throw new GestaoEscolarException("ID da disciplina é obrigatório");
+        }
+
+        // Verificar se aluno e disciplina existem
+        this.verificarAlunoExiste(notaDTO.getAlunoId());
+        this.verificarDisciplinaExiste(notaDTO.getDisciplinaId());
+
+        // Buscar as entidades
+        Aluno aluno = this.alunoRepository.findById(notaDTO.getAlunoId())
+                .orElseThrow(() -> new GestaoEscolarException("Aluno não encontrado"));
+        Disciplina disciplina = this.disciplinaRepository.findById(notaDTO.getDisciplinaId())
+                .orElseThrow(() -> new GestaoEscolarException("Disciplina não encontrada"));
+
+        // Criar a entidade Nota
+        Nota nota = new Nota();
+        nota.setAluno(aluno);
+        nota.setDisciplina(disciplina);
+        nota.setValor(notaDTO.getValor());
+        nota.setTipoAvaliacao(notaDTO.getTipoAvaliacao());
+        nota.setDataAvaliacao(notaDTO.getDataAvaliacao());
+        nota.setObservacao(notaDTO.getObservacao());
+
+        // Validar a nota
+        this.validarNota(nota);
         
         return notaRepository.save(nota);
     }

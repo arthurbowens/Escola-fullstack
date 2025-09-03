@@ -18,7 +18,7 @@
               class="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg transition-all duration-200 text-sm font-medium border border-blue-200 flex items-center space-x-2"
             >
               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1721 9z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 0121 9z"></path>
               </svg>
               <span>Alterar Senha</span>
             </button>
@@ -65,7 +65,7 @@
             </div>
             <div>
               <dt class="text-sm font-medium text-gray-500">Turma</dt>
-              <dd class="mt-1 text-sm text-gray-900">{{ aluno.turma?.nome }}</dd>
+              <dd class="mt-1 text-sm text-gray-900">{{ aluno.turmaNome || aluno.turma?.nome || 'Não informado' }}</dd>
             </div>
           </div>
         </div>
@@ -141,7 +141,14 @@
       <div class="bg-white shadow rounded-lg mb-8">
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Notas por Disciplina</h3>
-          <div class="space-y-6">
+          <div *ngIf="getDisciplinas().length === 0" class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma nota encontrada</h3>
+            <p class="mt-1 text-sm text-gray-500">Este aluno ainda não possui notas lançadas.</p>
+          </div>
+          <div *ngIf="getDisciplinas().length > 0" class="space-y-6">
             <div *ngFor="let disciplina of getDisciplinas()" class="border border-gray-200 rounded-lg p-4">
               <div class="flex justify-between items-center mb-3">
                 <h4 class="text-md font-semibold text-gray-900">{{ disciplina }}</h4>
@@ -165,7 +172,14 @@
       <div class="bg-white shadow rounded-lg">
         <div class="px-4 py-5 sm:p-6">
           <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Frequência por Disciplina</h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div *ngIf="frequenciasResumo.length === 0" class="text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma frequência encontrada</h3>
+            <p class="mt-1 text-sm text-gray-500">Este aluno ainda não possui registros de frequência.</p>
+          </div>
+          <div *ngIf="frequenciasResumo.length > 0" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div *ngFor="let freq of frequenciasResumo" class="border border-gray-200 rounded-lg p-4">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-md font-semibold text-gray-900">{{ freq.disciplina }}</h4>

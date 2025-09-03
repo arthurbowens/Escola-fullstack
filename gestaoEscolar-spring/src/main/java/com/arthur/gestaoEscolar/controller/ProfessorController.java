@@ -36,6 +36,17 @@ public class ProfessorController {
         }
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("hasRole('PROFESSOR')")
+    public ResponseEntity<ProfessorDTO> buscarProfessorLogado() {
+        try {
+            Professor professor = professorService.buscarProfessorLogado();
+            return ResponseEntity.ok(new ProfessorDTO(professor));
+        } catch (GestaoEscolarException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR') or #id == authentication.principal.id")
     public ResponseEntity<ProfessorDTO> buscarPorId(@PathVariable String id) {

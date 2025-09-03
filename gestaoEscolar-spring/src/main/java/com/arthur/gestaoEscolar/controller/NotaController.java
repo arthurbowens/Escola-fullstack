@@ -2,6 +2,7 @@ package com.arthur.gestaoEscolar.controller;
 
 import com.arthur.gestaoEscolar.model.entity.Nota;
 import com.arthur.gestaoEscolar.model.entity.TipoAvaliacao;
+import com.arthur.gestaoEscolar.model.dto.NotaDTO;
 import com.arthur.gestaoEscolar.service.NotaService;
 import com.arthur.gestaoEscolar.exception.GestaoEscolarException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/notas")
@@ -24,10 +26,13 @@ public class NotaController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR')")
-    public ResponseEntity<List<Nota>> buscarTodas() {
+    public ResponseEntity<List<NotaDTO>> buscarTodas() {
         try {
             List<Nota> notas = notaService.buscarTodas();
-            return ResponseEntity.ok(notas);
+            List<NotaDTO> notasDTO = notas.stream()
+                    .map(NotaDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(notasDTO);
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -45,11 +50,14 @@ public class NotaController {
     }
 
     @GetMapping("/aluno/{alunoId}")
-    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR') or #alunoId == authentication.principal.id")
-    public ResponseEntity<List<Nota>> buscarPorAluno(@PathVariable String alunoId) {
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR', 'ALUNO')")
+    public ResponseEntity<List<NotaDTO>> buscarPorAluno(@PathVariable String alunoId) {
         try {
             List<Nota> notas = notaService.buscarPorAluno(alunoId);
-            return ResponseEntity.ok(notas);
+            List<NotaDTO> notasDTO = notas.stream()
+                    .map(NotaDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(notasDTO);
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -68,10 +76,13 @@ public class NotaController {
 
     @GetMapping("/aluno/{alunoId}/disciplina/{disciplinaId}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR') or #alunoId == authentication.principal.id")
-    public ResponseEntity<List<Nota>> buscarPorAlunoEDisciplina(@PathVariable String alunoId, @PathVariable String disciplinaId) {
+    public ResponseEntity<List<NotaDTO>> buscarPorAlunoEDisciplina(@PathVariable String alunoId, @PathVariable String disciplinaId) {
         try {
             List<Nota> notas = notaService.buscarPorAlunoEDisciplina(alunoId, disciplinaId);
-            return ResponseEntity.ok(notas);
+            List<NotaDTO> notasDTO = notas.stream()
+                    .map(NotaDTO::new)
+                    .collect(Collectors.toList());
+            return ResponseEntity.ok(notasDTO);
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -114,10 +125,10 @@ public class NotaController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'PROFESSOR')")
-    public ResponseEntity<Nota> salvar(@RequestBody Nota nota) {
+    public ResponseEntity<NotaDTO> salvar(@RequestBody NotaDTO notaDTO) {
         try {
-            Nota notaSalva = notaService.salvar(nota);
-            return ResponseEntity.status(HttpStatus.CREATED).body(notaSalva);
+            Nota notaSalva = notaService.salvarComDTO(notaDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new NotaDTO(notaSalva));
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }

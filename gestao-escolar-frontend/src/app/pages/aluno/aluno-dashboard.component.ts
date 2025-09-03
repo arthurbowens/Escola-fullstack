@@ -4,8 +4,8 @@ import { RouterModule, Router } from '@angular/router';
 import { ChangePasswordComponent } from '../../components/change-password/change-password.component';
 import { AuthService } from '../../services/auth.service';
 import { AlunoService } from '../../services/aluno.service';
-import { NotaService } from '../../services/nota.service';
-import { FrequenciaService } from '../../services/frequencia.service';
+import { NotaService, NotaDTO } from '../../services/nota.service';
+import { FrequenciaService, FrequenciaDTO } from '../../services/frequencia.service';
 import { Usuario, TipoUsuario } from '../../models/usuario.model';
 import { Aluno, Nota, Frequencia, FrequenciaResumo } from '../../models/aluno.model';
 
@@ -18,8 +18,8 @@ import { Aluno, Nota, Frequencia, FrequenciaResumo } from '../../models/aluno.mo
 })
 export class AlunoDashboardComponent implements OnInit {
   aluno: Aluno | null = null;
-  notas: Nota[] = [];
-  frequencias: Frequencia[] = [];
+  notas: NotaDTO[] = [];
+  frequencias: FrequenciaDTO[] = [];
   frequenciasResumo: FrequenciaResumo[] = [];
   loading = false;
   error = '';
@@ -72,28 +72,46 @@ export class AlunoDashboardComponent implements OnInit {
   }
 
   loadNotas(alunoId: string): void {
+    console.log('📊 Iniciando busca de notas para aluno:', alunoId);
     this.notaService.getNotasPorAluno(alunoId).subscribe({
       next: (notas) => {
         console.log('✅ Notas carregadas:', notas);
+        console.log('📊 Total de notas:', notas.length);
         this.notas = notas;
       },
       error: (err) => {
         console.error('❌ Erro ao carregar notas:', err);
+        console.error('❌ Status:', err.status);
+        console.error('❌ Message:', err.message);
         // Não mostrar erro para notas, apenas log
       }
     });
   }
 
   loadFrequencias(alunoId: string): void {
+    console.log('📅 Iniciando busca de frequências para aluno:', alunoId);
     this.frequenciaService.getFrequenciasPorAluno(alunoId).subscribe({
       next: (frequencias) => {
         console.log('✅ Frequências carregadas:', frequencias);
+        console.log('📅 Total de frequências:', frequencias.length);
         this.frequencias = frequencias;
-        this.frequenciasResumo = this.frequenciaService.processarFrequencias(frequencias);
+        // Converter FrequenciaDTO[] para Frequencia[] para o processamento
+        const frequenciasParaProcessar: Frequencia[] = frequencias.map(freq => ({
+          id: freq.id,
+          dataAula: freq.dataAula,
+          presente: freq.presente,
+          observacao: freq.observacao,
+          disciplina: freq.disciplinaId ? { id: freq.disciplinaId, nome: freq.disciplinaNome || '' } : undefined,
+          aluno: freq.alunoId ? { id: freq.alunoId, nome: '' } : undefined
+        }));
+        this.frequenciasResumo = this.frequenciaService.processarFrequencias(frequenciasParaProcessar);
+        console.log('📅 Resumo de frequências:', this.frequenciasResumo);
         this.loading = false;
       },
       error: (err) => {
         console.error('❌ Erro ao carregar frequências:', err);
+        console.error('❌ Status:', err.status);
+        console.error('❌ Message:', err.message);
         // Não mostrar erro para frequências, apenas log
         this.loading = false;
       }
@@ -103,7 +121,7 @@ export class AlunoDashboardComponent implements OnInit {
   calcularMediaDisciplina(disciplina: string): number {
     if (!this.notas || this.notas.length === 0) return 0;
     
-    const notasDisciplina = this.notas.filter(nota => nota.disciplina?.nome === disciplina);
+    const notasDisciplina = this.notas.filter(nota => nota.disciplinaNome === disciplina);
     if (notasDisciplina.length === 0) return 0;
     
     const soma = notasDisciplina.reduce((acc, nota) => acc + nota.valor, 0);
@@ -113,7 +131,7 @@ export class AlunoDashboardComponent implements OnInit {
   calcularMediaGeral(): number {
     if (!this.notas || this.notas.length === 0) return 0;
     
-    const disciplinas = [...new Set(this.notas.map(nota => nota.disciplina?.nome).filter(Boolean) as string[])];
+    const disciplinas = [...new Set(this.notas.map(nota => nota.disciplinaNome).filter(Boolean) as string[])];
     const mediasDisciplinas = disciplinas.map(disciplina => this.calcularMediaDisciplina(disciplina));
     
     if (mediasDisciplinas.length === 0) return 0;
@@ -147,12 +165,12 @@ export class AlunoDashboardComponent implements OnInit {
 
   getDisciplinas(): string[] {
     if (!this.notas || this.notas.length === 0) return [];
-    return [...new Set(this.notas.map(nota => nota.disciplina?.nome).filter(Boolean) as string[])];
+    return [...new Set(this.notas.map(nota => nota.disciplinaNome).filter(Boolean) as string[])];
   }
 
-  getNotasDisciplina(disciplina: string): Nota[] {
+  getNotasDisciplina(disciplina: string): NotaDTO[] {
     if (!this.notas || this.notas.length === 0) return [];
-    return this.notas.filter(nota => nota.disciplina?.nome === disciplina);
+    return this.notas.filter(nota => nota.disciplinaNome === disciplina);
   }
 
   calcularFrequenciaMedia(): number {
