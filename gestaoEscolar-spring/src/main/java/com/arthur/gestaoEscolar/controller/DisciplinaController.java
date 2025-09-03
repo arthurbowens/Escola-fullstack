@@ -81,10 +81,19 @@ public class DisciplinaController {
 
     @PostMapping
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<Disciplina> salvar(@RequestBody Disciplina disciplina) {
+    public ResponseEntity<DisciplinaDTO> salvar(@RequestBody DisciplinaDTO disciplinaDTO) {
         try {
+            Disciplina disciplina = new Disciplina();
+            disciplina.setNome(disciplinaDTO.getNome());
+            disciplina.setCargaHoraria(disciplinaDTO.getCargaHoraria());
+            
+            // Se professorId foi informado, buscar o professor
+            if (disciplinaDTO.getProfessorId() != null && !disciplinaDTO.getProfessorId().isEmpty()) {
+                disciplina.setProfessor(disciplinaService.buscarProfessorPorId(disciplinaDTO.getProfessorId()));
+            }
+            
             Disciplina disciplinaSalva = disciplinaService.salvar(disciplina);
-            return ResponseEntity.status(HttpStatus.CREATED).body(disciplinaSalva);
+            return ResponseEntity.status(HttpStatus.CREATED).body(new DisciplinaDTO(disciplinaSalva));
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
@@ -92,10 +101,19 @@ public class DisciplinaController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMINISTRADOR')")
-    public ResponseEntity<Disciplina> atualizar(@PathVariable String id, @RequestBody Disciplina disciplina) {
+    public ResponseEntity<DisciplinaDTO> atualizar(@PathVariable String id, @RequestBody DisciplinaDTO disciplinaDTO) {
         try {
+            Disciplina disciplina = new Disciplina();
+            disciplina.setNome(disciplinaDTO.getNome());
+            disciplina.setCargaHoraria(disciplinaDTO.getCargaHoraria());
+            
+            // Se professorId foi informado, buscar o professor
+            if (disciplinaDTO.getProfessorId() != null && !disciplinaDTO.getProfessorId().isEmpty()) {
+                disciplina.setProfessor(disciplinaService.buscarProfessorPorId(disciplinaDTO.getProfessorId()));
+            }
+            
             Disciplina disciplinaAtualizada = disciplinaService.atualizar(id, disciplina);
-            return ResponseEntity.ok(disciplinaAtualizada);
+            return ResponseEntity.ok(new DisciplinaDTO(disciplinaAtualizada));
         } catch (GestaoEscolarException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

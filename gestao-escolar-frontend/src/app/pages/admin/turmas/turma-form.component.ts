@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TurmaService } from '../../../services/turma.service';
+import { DisciplinaService } from '../../../services/disciplina.service';
 import { Turma } from '../../../models/aluno.model';
+import { Disciplina } from '../../../models/disciplina.model';
 import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
@@ -25,17 +27,24 @@ export class TurmaFormComponent implements OnInit {
   isEditMode = false;
   turmaId: string | null = null;
 
+  // Propriedades para disciplinas
+  disciplinas: Disciplina[] = [];
+  disciplinasSelecionadas: string[] = [];
+  loadingDisciplinas = false;
+
   series = ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano', '6º Ano', '7º Ano', '8º Ano', '9º Ano'];
   anos = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
 
   constructor(
     private turmaService: TurmaService,
+    private disciplinaService: DisciplinaService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.checkEditMode();
+    this.loadDisciplinas();
   }
 
   private checkEditMode(): void {
@@ -56,6 +65,12 @@ export class TurmaFormComponent implements OnInit {
           serie: turma.serie,
           anoLetivo: turma.anoLetivo
         };
+        
+        // Carregar disciplinas já associadas à turma
+        if (turma.disciplinasIds && turma.disciplinasIds.length > 0) {
+          this.disciplinasSelecionadas = [...turma.disciplinasIds];
+        }
+        
         this.loading = false;
       },
       error: (error) => {
@@ -82,10 +97,22 @@ export class TurmaFormComponent implements OnInit {
   }
 
   private createTurma(): void {
-    this.turmaService.createTurma(this.turma).subscribe({
+    // Adicionar disciplinas selecionadas ao objeto turma
+    const turmaComDisciplinas = {
+      ...this.turma,
+      disciplinasIds: this.disciplinasSelecionadas
+    };
+
+    this.turmaService.createTurma(turmaComDisciplinas).subscribe({
       next: (turma) => {
         console.log('✅ Turma criada com sucesso:', turma);
-        this.router.navigate(['/admin/turmas']);
+        
+        // Se há disciplinas selecionadas, associá-las à turma
+        if (this.disciplinasSelecionadas.length > 0 && turma.id) {
+          this.associarDisciplinas(turma.id);
+        } else {
+          this.router.navigate(['/admin/turmas']);
+        }
       },
       error: (error) => {
         console.error('❌ Erro ao criar turma:', error);
@@ -95,18 +122,79 @@ export class TurmaFormComponent implements OnInit {
     });
   }
 
+  private associarDisciplinas(turmaId: string): void {
+    const operacoes = this.disciplinasSelecionadas.map(disciplinaId => 
+      this.turmaService.adicionarDisciplina(turmaId, disciplinaId)
+    );
+
+    Promise.all(operacoes.map(op => op.toPromise())).then(() => {
+      console.log('✅ Disciplinas associadas com sucesso');
+      this.router.navigate(['/admin/turmas']);
+    }).catch((error) => {
+      console.error('❌ Erro ao associar disciplinas:', error);
+      this.error = 'Turma criada, mas houve erro ao associar disciplinas';
+      this.loading = false;
+    });
+  }
+
   private updateTurma(): void {
     if (!this.turmaId) return;
 
     this.turmaService.updateTurma(this.turmaId, this.turma).subscribe({
       next: (turma) => {
         console.log('✅ Turma atualizada com sucesso:', turma);
-        this.router.navigate(['/admin/turmas']);
+        
+        // Se há disciplinas selecionadas, gerenciar as associações
+        if (this.disciplinasSelecionadas.length > 0) {
+          this.gerenciarDisciplinasTurma();
+        } else {
+          this.router.navigate(['/admin/turmas']);
+        }
       },
       error: (error) => {
         console.error('❌ Erro ao atualizar turma:', error);
         this.error = 'Erro ao atualizar turma';
         this.loading = false;
+      }
+    });
+  }
+
+  private gerenciarDisciplinasTurma(): void {
+    if (!this.turmaId) return;
+
+    // Primeiro, remover todas as disciplinas atuais
+    this.turmaService.getTurmaById(this.turmaId).subscribe({
+      next: (turmaAtual) => {
+        const disciplinasAtuais = turmaAtual.disciplinasIds || [];
+        
+        // Remover disciplinas que não estão mais selecionadas
+        const paraRemover = disciplinasAtuais.filter(id => !this.disciplinasSelecionadas.includes(id));
+        
+        // Adicionar disciplinas que foram selecionadas
+        const paraAdicionar = this.disciplinasSelecionadas.filter(id => !disciplinasAtuais.includes(id));
+        
+        const operacoes = [
+          ...paraRemover.map(id => this.turmaService.removerDisciplina(this.turmaId!, id)),
+          ...paraAdicionar.map(id => this.turmaService.adicionarDisciplina(this.turmaId!, id))
+        ];
+
+        if (operacoes.length === 0) {
+          this.router.navigate(['/admin/turmas']);
+          return;
+        }
+
+        Promise.all(operacoes.map(op => op.toPromise())).then(() => {
+          console.log('✅ Disciplinas atualizadas com sucesso');
+          this.router.navigate(['/admin/turmas']);
+        }).catch((error) => {
+          console.error('❌ Erro ao atualizar disciplinas:', error);
+          this.error = 'Turma atualizada, mas houve erro ao atualizar disciplinas';
+          this.loading = false;
+        });
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar turma atual:', error);
+        this.router.navigate(['/admin/turmas']);
       }
     });
   }
@@ -146,5 +234,38 @@ export class TurmaFormComponent implements OnInit {
     if (this.turma.serie && this.turma.anoLetivo) {
       this.turma.nome = `${this.turma.serie} ${this.turma.anoLetivo}`;
     }
+  }
+
+  // Métodos para gerenciar disciplinas
+  loadDisciplinas(): void {
+    this.loadingDisciplinas = true;
+    this.disciplinaService.getDisciplinas().subscribe({
+      next: (disciplinas) => {
+        this.disciplinas = disciplinas;
+        this.loadingDisciplinas = false;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar disciplinas:', error);
+        this.loadingDisciplinas = false;
+      }
+    });
+  }
+
+  toggleDisciplina(disciplinaId: string): void {
+    const index = this.disciplinasSelecionadas.indexOf(disciplinaId);
+    if (index > -1) {
+      this.disciplinasSelecionadas.splice(index, 1);
+    } else {
+      this.disciplinasSelecionadas.push(disciplinaId);
+    }
+  }
+
+  isDisciplinaSelecionada(disciplinaId: string): boolean {
+    return this.disciplinasSelecionadas.includes(disciplinaId);
+  }
+
+  getDisciplinaNome(disciplinaId: string): string {
+    const disciplina = this.disciplinas.find(d => d.id === disciplinaId);
+    return disciplina ? disciplina.nome : 'Disciplina não encontrada';
   }
 }

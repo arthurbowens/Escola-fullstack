@@ -128,4 +128,9 @@ public class DisciplinaService {
             throw new GestaoEscolarException("Professor não encontrado");
         }
     }
+
+    public Professor buscarProfessorPorId(String professorId) throws GestaoEscolarException {
+        return this.professorRepository.findById(professorId)
+                .orElseThrow(() -> new GestaoEscolarException("Professor não encontrado"));
+    }
 }

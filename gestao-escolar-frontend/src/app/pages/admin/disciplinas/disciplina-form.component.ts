@@ -3,7 +3,11 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { DisciplinaService } from '../../../services/disciplina.service';
+import { TurmaService } from '../../../services/turma.service';
+import { ProfessorService } from '../../../services/professor.service';
 import { Disciplina, DisciplinaDTO } from '../../../models/disciplina.model';
+import { Turma } from '../../../models/aluno.model';
+import { Professor } from '../../../models/professor.model';
 import { AdminNavComponent } from '../../../components/admin-nav/admin-nav.component';
 
 @Component({
@@ -24,8 +28,19 @@ export class DisciplinaFormComponent implements OnInit {
   isEditMode = false;
   disciplinaId: string | null = null;
 
+  // Propriedades para turmas
+  turmas: Turma[] = [];
+  turmasSelecionadas: string[] = [];
+  loadingTurmas = false;
+
+  // Propriedades para professores
+  professores: Professor[] = [];
+  loadingProfessores = false;
+
   constructor(
     private disciplinaService: DisciplinaService,
+    private turmaService: TurmaService,
+    private professorService: ProfessorService,
     private router: Router,
     private route: ActivatedRoute
   ) {}
@@ -39,6 +54,8 @@ export class DisciplinaFormComponent implements OnInit {
     } else {
       this.isEditMode = false;
     }
+    this.loadTurmas();
+    this.loadProfessores();
   }
 
   private loadDisciplina(id: string): void {
@@ -86,7 +103,13 @@ export class DisciplinaFormComponent implements OnInit {
       this.disciplinaService.createDisciplina(this.disciplina).subscribe({
         next: (disciplina) => {
           console.log('✅ Disciplina criada com sucesso:', disciplina);
-          this.router.navigate(['/admin/disciplinas']);
+          
+          // Se há turmas selecionadas, associá-las à disciplina
+          if (this.turmasSelecionadas.length > 0 && disciplina.id) {
+            this.associarTurmas(disciplina.id);
+          } else {
+            this.router.navigate(['/admin/disciplinas']);
+          }
         },
         error: (error) => {
           console.error('❌ Erro ao criar disciplina:', error);
@@ -95,6 +118,21 @@ export class DisciplinaFormComponent implements OnInit {
         }
       });
     }
+  }
+
+  private associarTurmas(disciplinaId: string): void {
+    const operacoes = this.turmasSelecionadas.map(turmaId => 
+      this.turmaService.adicionarDisciplina(turmaId, disciplinaId)
+    );
+
+    Promise.all(operacoes.map(op => op.toPromise())).then(() => {
+      console.log('✅ Turmas associadas com sucesso');
+      this.router.navigate(['/admin/disciplinas']);
+    }).catch((error) => {
+      console.error('❌ Erro ao associar turmas:', error);
+      this.error = 'Disciplina criada, mas houve erro ao associar turmas';
+      this.loading = false;
+    });
   }
 
   private validateForm(): boolean {
@@ -119,5 +157,72 @@ export class DisciplinaFormComponent implements OnInit {
 
   cancel(): void {
     this.router.navigate(['/admin/disciplinas']);
+  }
+
+  // Métodos para gerenciar turmas
+  loadTurmas(): void {
+    this.loadingTurmas = true;
+    this.turmaService.getTurmas().subscribe({
+      next: (turmas) => {
+        this.turmas = turmas;
+        this.loadingTurmas = false;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar turmas:', error);
+        this.loadingTurmas = false;
+      }
+    });
+  }
+
+  toggleTurma(turmaId: string): void {
+    const index = this.turmasSelecionadas.indexOf(turmaId);
+    if (index > -1) {
+      this.turmasSelecionadas.splice(index, 1);
+    } else {
+      this.turmasSelecionadas.push(turmaId);
+    }
+  }
+
+  isTurmaSelecionada(turmaId: string): boolean {
+    return this.turmasSelecionadas.includes(turmaId);
+  }
+
+  getTurmaNome(turmaId: string): string {
+    const turma = this.turmas.find(t => t.id === turmaId);
+    return turma ? turma.nome : 'Turma não encontrada';
+  }
+
+  getTotalAlunos(turmaId: string): number {
+    const turma = this.turmas.find(t => t.id === turmaId);
+    if (turma?.alunos && turma.alunos.length > 0) {
+      return turma.alunos.length;
+    }
+    if (turma?.alunosIds && turma.alunosIds.length > 0) {
+      return turma.alunosIds.length;
+    }
+    if (turma?.alunosNomes && turma.alunosNomes.length > 0) {
+      return turma.alunosNomes.length;
+    }
+    return 0;
+  }
+
+  // Métodos para gerenciar professores
+  loadProfessores(): void {
+    this.loadingProfessores = true;
+    this.professorService.getProfessores().subscribe({
+      next: (professores) => {
+        this.professores = professores;
+        this.loadingProfessores = false;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar professores:', error);
+        this.loadingProfessores = false;
+      }
+    });
+  }
+
+  getProfessorNome(professorId: string): string {
+    const professor = this.professores.find(p => p.id === professorId);
+    return professor ? professor.nome : 'Professor não encontrado';
   }
 }

@@ -32,6 +32,12 @@ export class TurmasListComponent implements OnInit {
   turmaDisciplinas: Disciplina[] = [];
   loadingDetails = false;
 
+  // Propriedades para modal de gerenciamento de disciplinas
+  showDisciplinasModal = false;
+  disciplinasDisponiveis: Disciplina[] = [];
+  disciplinasSelecionadas: string[] = [];
+  loadingDisciplinas = false;
+
   series = ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano', '6º Ano', '7º Ano', '8º Ano', '9º Ano'];
   anos = [2024, 2025, 2026, 2027, 2028];
 
@@ -202,5 +208,90 @@ export class TurmasListComponent implements OnInit {
     this.searchTerm = '';
     this.selectedSerie = '';
     this.selectedAno = null;
+  }
+
+  // Métodos para gerenciar disciplinas da turma
+  showGerenciarDisciplinas(turma: Turma): void {
+    this.selectedTurma = turma;
+    this.showDisciplinasModal = true;
+    this.loadingDisciplinas = true;
+    
+    // Carregar disciplinas disponíveis
+    this.disciplinaService.getDisciplinas().subscribe({
+      next: (disciplinas) => {
+        this.disciplinasDisponiveis = disciplinas;
+        // Inicializar disciplinas selecionadas com as que já estão associadas
+        this.disciplinasSelecionadas = turma.disciplinasIds || [];
+        this.loadingDisciplinas = false;
+      },
+      error: (error) => {
+        console.error('❌ Erro ao carregar disciplinas:', error);
+        this.alertService.error('Erro ao carregar disciplinas');
+        this.loadingDisciplinas = false;
+      }
+    });
+  }
+
+  closeDisciplinasModal(): void {
+    this.showDisciplinasModal = false;
+    this.selectedTurma = null;
+    this.disciplinasDisponiveis = [];
+    this.disciplinasSelecionadas = [];
+  }
+
+  toggleDisciplina(disciplinaId: string): void {
+    const index = this.disciplinasSelecionadas.indexOf(disciplinaId);
+    if (index > -1) {
+      this.disciplinasSelecionadas.splice(index, 1);
+    } else {
+      this.disciplinasSelecionadas.push(disciplinaId);
+    }
+  }
+
+  isDisciplinaSelecionada(disciplinaId: string): boolean {
+    return this.disciplinasSelecionadas.includes(disciplinaId);
+  }
+
+  getDisciplinaNome(disciplinaId: string): string {
+    const disciplina = this.disciplinasDisponiveis.find(d => d.id === disciplinaId);
+    return disciplina ? disciplina.nome : 'Disciplina não encontrada';
+  }
+
+  salvarDisciplinas(): void {
+    if (!this.selectedTurma?.id) return;
+
+    this.loadingDisciplinas = true;
+    const turmaId = this.selectedTurma.id;
+    
+    // Obter disciplinas atualmente associadas
+    const disciplinasAtuais = this.selectedTurma.disciplinasIds || [];
+    
+    // Disciplinas para adicionar
+    const paraAdicionar = this.disciplinasSelecionadas.filter(id => !disciplinasAtuais.includes(id));
+    
+    // Disciplinas para remover
+    const paraRemover = disciplinasAtuais.filter(id => !this.disciplinasSelecionadas.includes(id));
+
+    // Executar operações
+    const operacoes = [
+      ...paraAdicionar.map(id => this.turmaService.adicionarDisciplina(turmaId, id)),
+      ...paraRemover.map(id => this.turmaService.removerDisciplina(turmaId, id))
+    ];
+
+    if (operacoes.length === 0) {
+      this.closeDisciplinasModal();
+      return;
+    }
+
+    // Executar todas as operações
+    Promise.all(operacoes.map(op => op.toPromise())).then(() => {
+      this.alertService.success('Disciplinas atualizadas com sucesso!');
+      this.closeDisciplinasModal();
+      this.loadTurmas(); // Recarregar a lista
+    }).catch((error) => {
+      console.error('❌ Erro ao atualizar disciplinas:', error);
+      this.alertService.error('Erro ao atualizar disciplinas');
+      this.loadingDisciplinas = false;
+    });
   }
 }

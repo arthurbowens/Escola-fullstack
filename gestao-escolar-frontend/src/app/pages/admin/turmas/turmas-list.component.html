@@ -138,6 +138,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
               </svg>
             </button>
+
             <button
               (click)="editTurma(turma.id!)"
               class="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
@@ -285,6 +286,103 @@
           Fechar
         </button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Gerenciamento de Disciplinas -->
+<div *ngIf="showDisciplinasModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" (click)="closeDisciplinasModal()">
+  <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white" (click)="$event.stopPropagation()">
+    <!-- Header do Modal -->
+    <div class="flex justify-between items-center pb-4 border-b border-gray-200">
+      <h3 class="text-lg font-semibold text-gray-900">
+        Gerenciar Disciplinas - {{ selectedTurma?.nome }}
+      </h3>
+      <button 
+        (click)="closeDisciplinasModal()"
+        class="text-gray-400 hover:text-gray-600 transition-colors"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Conteúdo do Modal -->
+    <div class="mt-6">
+      <!-- Loading State -->
+      <div *ngIf="loadingDisciplinas" class="text-center py-8">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto"></div>
+        <p class="mt-4 text-gray-600">Carregando disciplinas...</p>
+      </div>
+
+      <!-- Lista de Disciplinas -->
+      <div *ngIf="!loadingDisciplinas" class="space-y-3">
+        <p class="text-sm text-gray-600 mb-4">
+          Selecione as disciplinas que serão oferecidas nesta turma:
+        </p>
+        
+        <div class="max-h-96 overflow-y-auto border border-gray-200 rounded-md">
+          <div *ngFor="let disciplina of disciplinasDisponiveis" 
+               class="flex items-center space-x-3 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+               (click)="toggleDisciplina(disciplina.id!)">
+            <input
+              type="checkbox"
+              [checked]="isDisciplinaSelecionada(disciplina.id!)"
+              class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+              (change)="toggleDisciplina(disciplina.id!)"
+            />
+            <div class="flex-1">
+              <div class="text-sm font-medium text-gray-900">{{ disciplina.nome }}</div>
+              <div class="text-xs text-gray-500">
+                {{ disciplina.cargaHoraria }}h/aula
+                <span *ngIf="disciplina.professorNome"> • Prof: {{ disciplina.professorNome }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div *ngIf="disciplinasDisponiveis.length === 0" class="text-center text-gray-500 py-8">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">Nenhuma disciplina disponível</h3>
+            <p class="mt-1 text-sm text-gray-500">Crie disciplinas primeiro para associá-las às turmas.</p>
+          </div>
+        </div>
+
+        <!-- Resumo das Seleções -->
+        <div *ngIf="disciplinasSelecionadas.length > 0" class="bg-purple-50 border border-purple-200 rounded-md p-4">
+          <h4 class="text-sm font-medium text-purple-800 mb-2">
+            Disciplinas Selecionadas ({{ disciplinasSelecionadas.length }})
+          </h4>
+          <div class="text-sm text-purple-700">
+            <span *ngFor="let disciplinaId of disciplinasSelecionadas; let last = last">
+              {{ getDisciplinaNome(disciplinaId) }}<span *ngIf="!last">, </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer do Modal -->
+    <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 mt-6">
+      <button 
+        (click)="closeDisciplinasModal()"
+        class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors"
+      >
+        Cancelar
+      </button>
+      <button 
+        (click)="salvarDisciplinas()"
+        [disabled]="loadingDisciplinas"
+        class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center"
+      >
+        <svg *ngIf="loadingDisciplinas" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        {{ loadingDisciplinas ? 'Salvando...' : 'Salvar Alterações' }}
+      </button>
     </div>
   </div>
 </div>

@@ -49,4 +49,13 @@ export class TurmaService {
   deleteTurma(id: string): Observable<void> {
     return this.http.delete<void>(`${this.API_URL}/${id}`, { headers: this.getHeaders() });
   }
+
+  // Métodos para gerenciar associações de disciplinas
+  adicionarDisciplina(turmaId: string, disciplinaId: string): Observable<void> {
+    return this.http.post<void>(`${this.API_URL}/${turmaId}/disciplinas/${disciplinaId}`, {}, { headers: this.getHeaders() });
+  }
+
+  removerDisciplina(turmaId: string, disciplinaId: string): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/${turmaId}/disciplinas/${disciplinaId}`, { headers: this.getHeaders() });
+  }
 }
