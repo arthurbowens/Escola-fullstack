@@ -135,12 +135,30 @@ export class TurmasListComponent implements OnInit {
 
   getTotalAlunos(turmaId: string): number {
     const turma = this.turmas.find(t => t.id === turmaId);
-    return turma?.alunos?.length || 0;
+    if (turma?.alunos && turma.alunos.length > 0) {
+      return turma.alunos.length;
+    }
+    if (turma?.alunosIds && turma.alunosIds.length > 0) {
+      return turma.alunosIds.length;
+    }
+    if (turma?.alunosNomes && turma.alunosNomes.length > 0) {
+      return turma.alunosNomes.length;
+    }
+    return 0;
   }
 
   getTotalDisciplinas(turmaId: string): number {
     const turma = this.turmas.find(t => t.id === turmaId);
-    return turma?.disciplinas?.length || 0;
+    if (turma?.disciplinas && turma.disciplinas.length > 0) {
+      return turma.disciplinas.length;
+    }
+    if (turma?.disciplinasIds && turma.disciplinasIds.length > 0) {
+      return turma.disciplinasIds.length;
+    }
+    if (turma?.disciplinasNomes && turma.disciplinasNomes.length > 0) {
+      return turma.disciplinasNomes.length;
+    }
+    return 0;
   }
 
   showTurmaDetails(turma: Turma): void {

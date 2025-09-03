@@ -10,6 +10,8 @@ export interface Professor {
   formacaoAcademica?: string;
   telefone?: string;
   disciplinas?: Disciplina[];
+  disciplinasIds?: string[];
+  disciplinasNomes?: string[];
 }
 
 export interface ProfessorDTO {

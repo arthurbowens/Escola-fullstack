@@ -55,6 +55,10 @@ export interface Turma {
   ano?: string; // Adicionando propriedade ano
   alunos?: Aluno[];
   disciplinas?: Disciplina[];
+  alunosIds?: string[];
+  alunosNomes?: string[];
+  disciplinasIds?: string[];
+  disciplinasNomes?: string[];
 }
 
 export interface AlunoDTO {

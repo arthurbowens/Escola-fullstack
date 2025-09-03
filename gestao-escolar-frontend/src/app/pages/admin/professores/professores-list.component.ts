@@ -132,6 +132,15 @@ export class ProfessoresListComponent implements OnInit {
 
   getTotalDisciplinas(professorId: string): number {
     const professor = this.professores.find(p => p.id === professorId);
-    return professor?.disciplinas?.length || 0;
+    if (professor?.disciplinas && professor.disciplinas.length > 0) {
+      return professor.disciplinas.length;
+    }
+    if (professor?.disciplinasIds && professor.disciplinasIds.length > 0) {
+      return professor.disciplinasIds.length;
+    }
+    if (professor?.disciplinasNomes && professor.disciplinasNomes.length > 0) {
+      return professor.disciplinasNomes.length;
+    }
+    return 0;
   }
 }
